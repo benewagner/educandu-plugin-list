@@ -1,7 +1,7 @@
 {
   "name": "@educandu/educandu-plugin-example",
-  "version": "0.0.0",
-  "description": "An example plugin for educandu",
+  "version": "1.0.0",
+  "description": "An csv list plugin for educandu",
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
@@ -11,10 +11,12 @@
     "node": "^18.0.0"
   },
   "keywords": [
-    "educandu"
+    "educandu",
+    "csv",
+    "list"
   ],
   "license": "MIT",
-  "author": "Educandu Team <team@educandu.dev>",
+  "author": "Educandu Team <team@educandu.dev>, Benedikt Wagner <benewagner-npm@gmx.de>",
   "homepage": "https://github.com/educandu/educandu-plugin-example",
   "repository": {
     "type": "git",
