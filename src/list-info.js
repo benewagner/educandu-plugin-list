@@ -55,10 +55,6 @@ class ListInfo {
     };
   }
 
-  // getTextRepresentation(content) {
-  //   return `width: ${content.width}\n\n${content.text}`;
-  // }
-
   validateContent(content) {
     const schema = joi.object({
       itemTemplate: joi.object(),
