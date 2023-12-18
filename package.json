@@ -17,10 +17,10 @@
   ],
   "license": "MIT",
   "author": "Educandu Team <team@educandu.dev>, Benedikt Wagner <benewagner-npm@gmx.de>",
-  "homepage": "https://github.com/educandu/educandu-plugin-example",
+  "homepage": "https://github.com/benewagner/educandu-plugin-list",
   "repository": {
     "type": "git",
-    "url": "https://github.com/educandu/educandu-plugin-example"
+    "url": "https://github.com/benewagner/educandu-plugin-list"
   },
   "dependencies": {
     "jschardet": "^3.0.0"
