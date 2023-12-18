@@ -1,9 +1,9 @@
 import { Input, Tag } from 'antd';
 import ListItem from './list-item.js';
 import { useTranslation } from 'react-i18next';
+import React, { useState, useRef, useEffect } from 'react';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
-import React, { useState, useRef, useEffect } from 'react';
 import { sectionDisplayProps } from '@educandu/educandu/ui/default-prop-types.js';
 
 const { CheckableTag } = Tag;
