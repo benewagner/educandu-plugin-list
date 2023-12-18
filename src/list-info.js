@@ -1,48 +1,74 @@
 import joi from 'joi';
 import React from 'react';
-import { ClockCircleOutlined } from '@ant-design/icons';
+import ListIcon from './list-icon.js';
+import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
 import { couldAccessUrlFromRoom } from '@educandu/educandu/utils/source-utils.js';
 import GithubFlavoredMarkdown from '@educandu/educandu/common/github-flavored-markdown.js';
 
-class ServerTimeInfo {
+class ListInfo {
   static dependencies = [GithubFlavoredMarkdown];
 
-  static typeName = 'educandu/educandu-plugin-example';
-
-  allowsInput = true;
+  static typeName = 'benewagner/educandu-plugin-list';
 
   constructor(gfm) {
     this.gfm = gfm;
   }
 
   getDisplayName(t) {
-    return t('educandu/educandu-plugin-example:name');
+    return t('benewagner/educandu-plugin-list:name');
   }
 
   getIcon() {
-    return <ClockCircleOutlined />;
+    return <ListIcon />;
   }
 
   async resolveDisplayComponent() {
-    return (await import('./example-display.js')).default;
+    return (await import('./list-display.js')).default;
   }
 
   async resolveEditorComponent() {
-    return (await import('./example-editor.js')).default;
+    return (await import('./list-editor.js')).default;
+  }
+
+  getItemTemplateInputTemplate() {
+    return {
+      key: uniqueId.create(),
+      label: '',
+      value: ''
+    };
   }
 
   getDefaultContent() {
     return {
-      text: '',
-      width: 100
+      itemTemplate: {
+        display: '',
+        inputs: []
+      },
+      csvData: [[]],
+      customLabels: [],
+      listName: '',
+      items: [],
+      searchTags: [],
+      isCC0Music: false,
+      renderSearch: true
     };
   }
 
+  // getTextRepresentation(content) {
+  //   return `width: ${content.width}\n\n${content.text}`;
+  // }
+
   validateContent(content) {
     const schema = joi.object({
-      text: joi.string().allow('').required(),
-      width: joi.number().min(0).max(100).required()
+      itemTemplate: joi.object(),
+      listName: joi.string().allow('').required(),
+      items: joi.array().required(),
+      searchTags: joi.array(),
+      csvData: joi.array(),
+      customLabels: joi.array(),
+      isCC0Music: joi.boolean().required(),
+      renderSearch: joi.boolean().required()
     });
 
     joi.attempt(content, schema, { abortEarly: false, convert: false, noDefaults: true });
@@ -68,4 +94,4 @@ class ServerTimeInfo {
   }
 }
 
-export default ServerTimeInfo;
+export default ListInfo;
