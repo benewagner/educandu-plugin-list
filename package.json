@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@ant-design/icons": "5.0.1",
-    "@educandu/dev-tools": "^11.5.1",
+    "@educandu/dev-tools": "^11.6.0",
     "@educandu/educandu": "3.2.2",
     "@educandu/node-jsx-loader": "^3.1.0",
     "@educandu/rooms-auth-lambda": "^6.1.0",
