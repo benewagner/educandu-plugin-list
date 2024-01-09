@@ -1,4 +1,4 @@
-# educandu-plugin-piano
+# educandu-plugin-list
 
 
 A list plugin for educandu
