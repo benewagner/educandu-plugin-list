@@ -30,7 +30,8 @@ export default function ListEditor({ content, onContentChanged }) {
     onContentChanged({ ...content, ...newContentValues });
   };
 
-  const customRequest = ({ file, onSuccess, onError }) => {
+  // customRequest also provides onError
+  const customRequest = ({ file, onSuccess }) => {
 
     Papa.parse(file, {
       encoding: encodingRef.current,
