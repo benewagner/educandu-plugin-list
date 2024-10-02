@@ -723,10 +723,10 @@
   resolved "https://registry.yarnpkg.com/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz#b6c75a56a1947cc916ea058772d666a2c8932f31"
   integrity sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==
 
-"@educandu/dev-tools@^13.0.0":
-  version "13.0.0"
-  resolved "https://registry.yarnpkg.com/@educandu/dev-tools/-/dev-tools-13.0.0.tgz#58252978fafd53337d0b7f5718e2afed3ad11baa"
-  integrity sha512-rfkAIe3gOOPXcoo5kKgJrDy7rcOU7Z1yx++OZHLTUgpk/TZzyRwn6DmFGCa5VAqbvIKJCKxE2etI4eA2DxkYkw==
+"@educandu/dev-tools@^14.0.0":
+  version "14.0.0"
+  resolved "https://registry.yarnpkg.com/@educandu/dev-tools/-/dev-tools-14.0.0.tgz#4157519a8d6a80af74eb45899cfebe941784465b"
+  integrity sha512-303DhWhD3VHftiU8z3ZfW9tpUq0Cw3DqBrTS0twkxYXw+CtfRA5PFSU0NLuWHs3ADGlh7993ML4mo7A2ieg/cw==
   dependencies:
     "@rauschma/stringio" "^1.4.0"
     axios "^1.6.2"
@@ -758,10 +758,10 @@
     yaml "^2.3.4"
     yargs "^17.7.2"
 
-"@educandu/educandu@3.20.0":
-  version "3.20.0"
-  resolved "https://registry.yarnpkg.com/@educandu/educandu/-/educandu-3.20.0.tgz#b65bf699e60f714f64a7c91ecfbc78eecd105f04"
-  integrity sha512-Q8F0syyQMZsYoHjPnRP/NwzW++1GUNs7kmB9otysPDpALXFgg7gAxALBAoIaDKLyTR8+08ofn3/ntmy9FsV9MQ==
+"@educandu/educandu@3.21.0":
+  version "3.21.0"
+  resolved "https://registry.yarnpkg.com/@educandu/educandu/-/educandu-3.21.0.tgz#f34a5a898d75c68eb5d294b8e7813307618c20d1"
+  integrity sha512-p9RinjKNYu6o4qWtSj0SXeOZcXtMg8NzF5DgOT968PrjGl6KouWzTgfejzdIHJmDpoP/yKRiRxpXgFrN5eblvw==
   dependencies:
     "@ant-design/icons" "5.5.1"
     "@aws-sdk/client-s3" "^3.470.0"
@@ -854,17 +854,17 @@
     umzug "^3.4.0"
     unidiff "^1.0.4"
 
-"@educandu/node-jsx-loader@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@educandu/node-jsx-loader/-/node-jsx-loader-3.2.0.tgz#35113b2eeb2861f6043583fb8c6bd01e21d9a7f7"
-  integrity sha512-0ElBWawABbR6NAkCK/YclLT3QgBTUiE2hh9WDcnZ6uL0wm6S7jXuTAkN+QkMcFBoyC/3c1R7w5ICBeZkODZK6w==
+"@educandu/node-jsx-loader@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@educandu/node-jsx-loader/-/node-jsx-loader-4.0.0.tgz#b001912330cfb46372383112752336b0f0f9f43e"
+  integrity sha512-ggfNAvFcLLnZq3k1kRRjbJzumRD1a5FFX5nEBvrUpeqJMlQS3tywaRgWcBDDtBuHC8yjMCxGYmjOivj/zWzzFA==
   dependencies:
     esbuild "^0.19.8"
 
-"@educandu/rooms-auth-lambda@^6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@educandu/rooms-auth-lambda/-/rooms-auth-lambda-6.2.0.tgz#b3749919af6d69c73258f76a4c165780bed2ad41"
-  integrity sha512-wApHQVpQ8JX/tBLdsu+lA+strBtqhJxqS8fWK1sciw108cVLcty5OGa2ngDd4omRLq6H8G2Jlbm7CqJKu2rtUg==
+"@educandu/rooms-auth-lambda@^6.2.1":
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/@educandu/rooms-auth-lambda/-/rooms-auth-lambda-6.2.1.tgz#1c2ed1cf38a10f38c3a5a54cd4c27b50822ee534"
+  integrity sha512-wRS/Vlmjlc4HOiCXxMI2ipUBsWNpc8IFxcuQu4jMSBapexBTndTRFhXzngQ5Z39APFCyu1qS92xM1TYRhneVPw==
   dependencies:
     cors "^2.8.5"
     envalid "^8.0.0"

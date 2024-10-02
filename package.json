@@ -8,7 +8,7 @@
     "./*": "./dist/*"
   },
   "engines": {
-    "node": "^18.0.0"
+    "node": "^20.0.0"
   },
   "keywords": [
     "educandu",
@@ -27,10 +27,10 @@
   },
   "devDependencies": {
     "@ant-design/icons": "5.5.1",
-    "@educandu/dev-tools": "^13.0.0",
-    "@educandu/educandu": "3.20.0",
-    "@educandu/node-jsx-loader": "^3.2.0",
-    "@educandu/rooms-auth-lambda": "^6.2.0",
+    "@educandu/dev-tools": "^14.0.0",
+    "@educandu/educandu": "3.21.0",
+    "@educandu/node-jsx-loader": "^4.0.0",
+    "@educandu/rooms-auth-lambda": "^6.2.1",
     "@vitest/coverage-v8": "^1.0.2",
     "antd": "5.21.2",
     "del": "^7.1.0",
@@ -45,7 +45,7 @@
   },
   "peerDependencies": {
     "@ant-design/icons": ">=5.5.1",
-    "@educandu/educandu": ">=3.20.0",
+    "@educandu/educandu": ">=3.21.0",
     "antd": ">=5.21.2",
     "joi": ">=17.11.0",
     "react": ">=18.2.0",
