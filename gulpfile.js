@@ -23,6 +23,8 @@ let isInWatchMode = false;
 let currentCdnProxy = null;
 let currentAppBuildContext = null;
 
+process.env.NODE_ENV ||= 'development';
+
 const testAppEnv = {
   TEST_APP_PORT: '3000',
   TEST_APP_APP_ROOT_URL: 'http://localhost:3000',
@@ -161,7 +163,7 @@ export async function startServer() {
   currentCdnProxy = new NodeProcess({
     script: 'node_modules/@educandu/rooms-auth-lambda/src/dev-server/run.js',
     env: {
-      NODE_ENV: 'development',
+      NODE_ENV: process.env.NODE_ENV,
       PORT: 10000,
       WEBSITE_BASE_URL: 'http://localhost:3000',
       CDN_BASE_URL: 'http://localhost:9000/dev-educandu-cdn',
@@ -174,7 +176,7 @@ export async function startServer() {
     script: 'test-app/src/index.js',
     jsx: true,
     env: {
-      NODE_ENV: 'development',
+      NODE_ENV: process.env.NODE_ENV,
       ...testAppEnv
     }
   });
