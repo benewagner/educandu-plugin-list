@@ -4,10 +4,11 @@ import CSVLabel from './csv-label.js';
 import { useTranslation } from 'react-i18next';
 import Logger from '@educandu/educandu/common/logger.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
+import UrlInput from '@educandu/educandu/components/url-input.js';
 import React, { useRef, useId, useEffect, useState } from 'react';
 import { Form, Upload, Button, Input, Divider, Switch } from 'antd';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
-import { CloudUploadOutlined, DownloadOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
 import DragAndDropContainer from '@educandu/educandu/components/drag-and-drop-container.js';
 import { swapItemsAt, removeItemAt, moveItem } from '@educandu/educandu/utils/array-utils.js';
@@ -20,11 +21,23 @@ export default function ListEditor({ content, onContentChanged }) {
   const droppableIdRef = useRef(useId());
   const { t } = useTranslation('benewagner/educandu-plugin-list');
   const [isCheckBoxChanged, setIsCheckboxChanged] = useState(false);
+  const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
   const { listName, csvData, isCC0Music, customLabels, renderSearch } = content;
 
   const FormItem = Form.Item;
   const encodingRef = useRef(null);
   const filterRegex = /^(?:track|bsbLink|hmtLink)-[1-9]\d?$/;
+
+  const newItemData = useRef(customLabels.map(() => ''));
+
+  const getAudioTemplate = () => {
+    if (isCC0Music) {
+      return ['', '', ''];
+    }
+    return ['', ''];
+  };
+
+  const [newAudios, setNewAudios] = useState([]);
 
   const updateContent = newContentValues => {
     onContentChanged({ ...content, ...newContentValues });
@@ -62,19 +75,27 @@ export default function ListEditor({ content, onContentChanged }) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = event => {
-
-          const csvResult = event.target.result.split(/\r|\n|\r\n/);
-
           try {
-            encodingRef.current = jschardet.detect(csvResult.toString()).encoding;
+            const arrayBuffer = event.target.result;
+
+            // ArrayBuffer manuell in eine Binärzeichenkette konvertieren
+            let binaryString = '';
+            const bytes = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < bytes.length; i += 1) {
+              binaryString += String.fromCharCode(bytes[i]);
+            }
+
+            // Erkennung der Kodierung mit jschardet
+            const encoding = jschardet.detect(binaryString).encoding;
+            encodingRef.current = encoding;
             resolve();
           } catch (error) {
-            logger.error(error);
+            logger.error('Fehler bei der Kodierungserkennung:', error);
             reject(error);
           }
         };
 
-        reader.readAsBinaryString(file);
+        reader.readAsArrayBuffer(file);
       });
     },
     customRequest,
@@ -170,8 +191,8 @@ export default function ListEditor({ content, onContentChanged }) {
           onMoveDown={handleMoveLabelDown}
           onDelete={handleDeleteLabel}
           itemsCount={customLabels.length}
-          >
-          <div className="List-ListListList" style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
+        >
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
             <div style={{ margin: '0 1rem 0 2rem', width: '100%', maxWidth: '154px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label !== '' ? `${label}:` : `[${t('new')}]:`}</div>
             <Input value={customLabels[index]} onChange={e => handleLabelChanged(e, index)} />
           </div>
@@ -194,7 +215,7 @@ export default function ListEditor({ content, onContentChanged }) {
     }
     const newCustomLabels = isCC0Music ? csvData[0].filter(label => !filterRegex.test(label)) : csvData[0];
     updateContent({ customLabels: newCustomLabels });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCC0Music, isCheckBoxChanged]);
 
   return (
@@ -223,20 +244,87 @@ export default function ListEditor({ content, onContentChanged }) {
           <Switch
             size="small"
             checked={isCC0Music}
+            disabled={isNewEntryEditActive}
             onChange={handleUpdateCC0MusicChanged}
-            />
+          />
         </FormItem>
         <FormItem label={t('searchFunctionality')} {...FORM_ITEM_LAYOUT}>
           <Switch
             size="small"
             checked={renderSearch}
             onChange={e => updateContent({ renderSearch: e })}
-            />
+          />
         </FormItem>
         {csvData[0][0] ? <Divider plain>{t('display')}</Divider> : null}
         <DragAndDropContainer droppableId={droppableIdRef.current} items={dragAndDropLabels} onItemMove={handleMoveLabel} />
-      </Form>
-    </div>
+        <Divider plain>{t('newItem')}</Divider>
+        {!isNewEntryEditActive
+          ? <FormItem {...FORM_ITEM_LAYOUT}>
+            <Button icon={<PlusOutlined />} type='primary' onClick={() => setIsNewEntryEditActive(true)} />
+          </FormItem>
+          : <div>{customLabels.map((label, index) => (
+            <div key={Math.random()} style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
+              <div style={{ margin: '0 1rem 0 2rem', width: '100%', maxWidth: '154px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+              <Input
+                defaultValue=''
+                onChange={e => {
+                  newItemData.current[index] = e.target.value;
+                }}
+              />
+            </div>
+          ))}
+            {newAudios.length > 0 ? <Divider plain dashed>Audios</Divider> : null}
+            {newAudios.map((arr, index) => !isCC0Music
+              ? (
+                <div key={Math.random()}>
+                  <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}><Input value={arr[0]} onChange={() => { }} /></FormItem>
+                  <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}><UrlInput value={arr[1]} onChange={() => { }} /></FormItem>
+                </div>
+              )
+              : <div key={Math.random()}>
+                <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}><Input value={arr[0]} onChange={() => { }} /></FormItem>
+                <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}><UrlInput value={arr[2]} onChange={() => { }} /></FormItem>
+                <FormItem {...FORM_ITEM_LAYOUT} label={`BSB-URL ${index + 1}`}><Input value={arr[1]} onChange={() => { }} /></FormItem>
+              </div>)}
+            <Button
+              icon={<PlusOutlined />}
+              type='primary'
+              style={{ marginLeft: '32px', marginTop: '16px' }}
+              onClick={() => {
+                setNewAudios(prev => {
+                  const currentNewAudios = [...prev];
+                  currentNewAudios.push(getAudioTemplate());
+                  return currentNewAudios;
+                });
+              }}
+            >Audio
+            </Button>
+            <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
+              <Button
+                type='default'
+                onClick={() => { setIsNewEntryEditActive(false); }}
+              >{t('common:cancel')}
+              </Button>
+              <Button
+                type='primary'
+                onClick={() => {
+                  setIsNewEntryEditActive(false);
+                  const newCsvData = cloneDeep(csvData);
+                  newCsvData.push(newItemData.current);
+
+                  const csvDataLabels = newCsvData.shift();
+                  newCsvData.sort((a, b) => a[0].localeCompare(b[0]));
+                  newCsvData.splice(0, 0, csvDataLabels);
+
+                  updateContent({ csvData: newCsvData });
+                  newItemData.current = customLabels.map(() => '');
+                }}
+              >{t('save')}
+              </Button>
+            </div>
+          </div>}
+      </Form >
+    </div >
   );
 }
 

@@ -59,6 +59,14 @@
     "uploadCsvFile": {
       "en": "Upload CSV File",
       "de": "CSV-Datei hochladen"
+    },
+    "newItem": {
+      "en": "New Item",
+      "de": "Neuer Datensatz"
+    },
+    "save": {
+      "en": "Save Item",
+      "de": "Datensatz speichern"
     }
   }
 }
