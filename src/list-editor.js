@@ -3,6 +3,7 @@ import jschardet from 'jschardet';
 import CSVLabel from './csv-label.js';
 import { useTranslation } from 'react-i18next';
 import Logger from '@educandu/educandu/common/logger.js';
+import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
 import UrlInput from '@educandu/educandu/components/url-input.js';
 import React, { useRef, useId, useEffect, useState } from 'react';
@@ -24,20 +25,28 @@ export default function ListEditor({ content, onContentChanged }) {
   const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
   const { listName, csvData, isCC0Music, customLabels, renderSearch } = content;
 
+  const [triggerRender, setTriggerRender] = useState(false);
+
+  // Don't render file upload component when list has been manually created
+  const [isCustomList, setIsCustomList] = useState(false);
+  const [hasListBeenCreated, setHasListBeenCreated] = useState(false);
+
   const FormItem = Form.Item;
   const encodingRef = useRef(null);
   const filterRegex = /^(?:track|bsbLink|hmtLink)-[1-9]\d?$/;
 
   const newItemData = useRef(customLabels.map(() => ''));
 
-  const getAudioTemplate = () => {
-    if (isCC0Music) {
-      return ['', '', ''];
-    }
-    return ['', ''];
-  };
+  const getAudioTemplate = () => isCC0Music ? ['', '', '',] : ['', ''];
 
-  const [newAudios, setNewAudios] = useState([]);
+  // const [newAudios, setNewAudios] = useState([]);
+  const newAudios = useRef([]);
+  const [audioUrls, setAudioUrls] = useState([]);
+
+  const audioKeys = useRef([]);
+  while (newAudios.current.length > audioKeys.current.length) {
+    audioKeys.current.push(uniqueId.create());
+  }
 
   const updateContent = newContentValues => {
     onContentChanged({ ...content, ...newContentValues });
@@ -58,6 +67,7 @@ export default function ListEditor({ content, onContentChanged }) {
         displayData.splice(0, 0, csvDataLabels);
         const newCustomLabels = isCC0Music ? displayData[0].filter(label => !filterRegex.test(label)) : displayData[0];
         updateContent({ csvData: displayData, customLabels: newCustomLabels });
+        setHasListBeenCreated(true);
         onSuccess();
       },
       error: error => {
@@ -181,7 +191,7 @@ export default function ListEditor({ content, onContentChanged }) {
     return (
       <React.Fragment>
         <CSVLabel
-          key={label}
+          key={label + index}
           index={index}
           arrayLength={arrayLength}
           isDragged={isDragged}
@@ -203,11 +213,23 @@ export default function ListEditor({ content, onContentChanged }) {
   };
 
   const getDragAndDropListItems = () => csvData[0]?.map((label, index) => ({
-    key: label !== '' ? label : `new-label-${index}`,
+    key: label !== '' ? label + index : `new-label-${index}`,
     render: ({ dragHandleProps, isDragged, isOtherDragged }) => renderCsvData({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength: customLabels.length })
   })).filter(elem => isCC0Music ? !filterRegex.test(elem.key) : true);
 
-  const dragAndDropLabels = getDragAndDropListItems();
+  const getDragAndDropCustomListItems = () => customLabels?.map((label, index) => ({
+    key: label !== '' ? label + index : `new-label-${index}`,
+    render: ({ dragHandleProps, isDragged, isOtherDragged }) => renderCsvData({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength: customLabels.length })
+  })).filter(elem => isCC0Music ? !filterRegex.test(elem.key) : true);
+
+  let dragAndDropCustomListLabels = [];
+  let dragAndDropLabels = [];
+
+  if (isCustomList) {
+    dragAndDropCustomListLabels = getDragAndDropCustomListItems();
+  } else {
+    dragAndDropLabels = getDragAndDropListItems();
+  }
 
   useEffect(() => {
     if (!isCheckBoxChanged) {
@@ -218,36 +240,188 @@ export default function ListEditor({ content, onContentChanged }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCC0Music, isCheckBoxChanged]);
 
+  useEffect(() => {
+    console.log(csvData);
+  }, []);
+
+  const renderCustomListLabels = () => (
+    <div>
+      {csvData[0][0] ? <Divider plain>{t('display')}</Divider> : null}
+      <DragAndDropContainer
+        droppableId={droppableIdRef.current}
+        items={dragAndDropCustomListLabels}
+        onItemMove={handleMoveLabel}
+      />
+      {console.log(dragAndDropLabels)}
+    </div>
+  );
+
+  const renderCustomListEditor = () => (
+    <React.Fragment>
+      {!hasListBeenCreated
+        ? (
+          <FormItem {...FORM_ITEM_LAYOUT}>
+            <Button
+              icon={<PlusOutlined />}
+              type='primary'
+              onClick={() => {
+                setIsCustomList(true);
+                setHasListBeenCreated(true);
+                updateContent({ customLabels: ['Neues Label', 'Neues Label'] });
+              }}
+            >
+              {t('createNewList')}
+            </Button>
+          </FormItem>
+        )
+        : null}
+
+      {isCustomList ? <Divider plain>{t('customList')}</Divider> : null}
+
+      {isCustomList && renderCustomListLabels()}
+
+      {hasListBeenCreated ? <Divider plain>{t('newItem')}</Divider> : null}
+
+      {hasListBeenCreated && !isNewEntryEditActive
+        ? <FormItem {...FORM_ITEM_LAYOUT}>
+          <Button icon={<PlusOutlined />} type='primary' onClick={() => setIsNewEntryEditActive(true)} />
+        </FormItem>
+        : null}
+
+      {hasListBeenCreated
+        ? newAudios.current.map((arr, index) => !isCC0Music
+          ? (
+            <div key={audioKeys.current[index]}>
+              <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}><Input onChange={e => { newAudios.current[index][0] = e.target.value; }} /></FormItem>
+              <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}>
+                <UrlInput
+                  value={audioUrls[index]}
+                  onChange={e => {
+                    newAudios.current[index][1] = e;
+                    setAudioUrls(prev => {
+                      const newAudioUrls = cloneDeep(prev);
+                      newAudioUrls[index] = e;
+                      return newAudioUrls;
+                    });
+                  }}
+                />
+              </FormItem>
+            </div>
+          )
+          : <div key={`${audioKeys.current[index]}-CC0`}>
+            <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}>
+              <Input onChange={e => { newAudios.current[index][0] = e.target.value; }} />
+            </FormItem>
+            <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}>
+              <UrlInput
+                value={audioUrls[index]}
+                onChange={e => {
+                  newAudios.current[index][2] = e;
+                  setAudioUrls(prev => {
+                    const newAudioUrls = cloneDeep(prev);
+                    newAudioUrls[index] = e;
+                    return newAudioUrls;
+                  });
+                }}
+              />
+            </FormItem>
+            <FormItem {...FORM_ITEM_LAYOUT} label={`BSB-URL ${index + 1}`}>
+              <Input onChange={e => { newAudios.current[index][1] = e.target.value; }} />
+            </FormItem>
+          </div>)
+        : null}
+      {hasListBeenCreated && isNewEntryEditActive
+        ? <React.Fragment>
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            style={{ marginLeft: '32px', marginTop: '16px' }}
+            onClick={() => {
+              newAudios.current.push(getAudioTemplate());
+              setTriggerRender(prev => !prev);
+            }}
+          >
+            Audio
+          </Button><div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
+            <Button
+              type="default"
+              onClick={() => {
+                setIsNewEntryEditActive(false);
+                newAudios.current = [];
+                setAudioUrls(prev => {
+                  const newAudioUrls = cloneDeep(prev);
+                  newAudioUrls.push('');
+                  return newAudioUrls;
+                });
+              }}
+            >
+              {t('common:cancel')}
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => {
+                setIsNewEntryEditActive(false);
+
+                for (const audio of newAudios.current) {
+                  for (const dataString of audio) {
+                    newItemData.current.push(dataString);
+                  }
+                }
+
+                const newCsvData = cloneDeep(csvData);
+                newCsvData.push(newItemData.current);
+
+                const csvDataLabels = newCsvData.shift();
+                newCsvData.sort((a, b) => a[0].localeCompare(b[0]));
+                newCsvData.splice(0, 0, csvDataLabels);
+
+                updateContent({ csvData: newCsvData });
+                newItemData.current = customLabels.map(() => '');
+              }}
+            >
+              {t('save')}
+            </Button>
+          </div>
+        </React.Fragment>
+        : null}
+    </React.Fragment>
+  );
+
+  const renderDragger = () => (
+
+    <React.Fragment><FormItem label={t('csvImport')} {...FORM_ITEM_LAYOUT}>
+      <Dragger {...props}>
+        <p className="ant-upload-drag-icon">
+          <CloudUploadOutlined />
+        </p>
+        <p className="ant-upload-text">{t('uploadCsvFile')}</p>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <p className="EmptyState-buttonSubtext List-buttonSubtext">
+            {t('dragAndDropOrClick')}
+          </p>
+        </div>
+      </Dragger>
+    </FormItem><FormItem label={t('csvExport')} {...FORM_ITEM_LAYOUT}>
+        <Button icon={<DownloadOutlined />} onClick={downloadCSV}>Download CSV</Button>
+      </FormItem>
+    </React.Fragment>
+  );
+
   return (
     <div>
       <Form labelAlign="left">
         <FormItem label={t('listName')} {...FORM_ITEM_LAYOUT}>
           <Input value={listName} onChange={handleListNameChanged} />
         </FormItem>
-        <FormItem label={t('csvImport')} {...FORM_ITEM_LAYOUT}>
-          <Dragger {...props}>
-            <p className="ant-upload-drag-icon">
-              <CloudUploadOutlined />
-            </p>
-            <p className="ant-upload-text">{t('uploadCsvFile')}</p>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <p className="EmptyState-buttonSubtext List-buttonSubtext">
-                {t('dragAndDropOrClick')}
-              </p>
-            </div>
-          </Dragger>
-        </FormItem>
-        <FormItem label={t('csvExport')} {...FORM_ITEM_LAYOUT}>
-          <Button icon={<DownloadOutlined />} onClick={downloadCSV}>Download CSV</Button>
-        </FormItem>
-        <FormItem label={t('updateCC0Music')} {...FORM_ITEM_LAYOUT}>
+        {!isCustomList && renderDragger()}
+        {!isCustomList && <FormItem label={t('updateCC0Music')} {...FORM_ITEM_LAYOUT}>
           <Switch
             size="small"
             checked={isCC0Music}
             disabled={isNewEntryEditActive}
             onChange={handleUpdateCC0MusicChanged}
           />
-        </FormItem>
+        </FormItem>}
         <FormItem label={t('searchFunctionality')} {...FORM_ITEM_LAYOUT}>
           <Switch
             size="small"
@@ -256,76 +430,16 @@ export default function ListEditor({ content, onContentChanged }) {
           />
         </FormItem>
         {csvData[0][0] ? <Divider plain>{t('display')}</Divider> : null}
-        <DragAndDropContainer droppableId={droppableIdRef.current} items={dragAndDropLabels} onItemMove={handleMoveLabel} />
-        <Divider plain>{t('newItem')}</Divider>
-        {!isNewEntryEditActive
-          ? <FormItem {...FORM_ITEM_LAYOUT}>
-            <Button icon={<PlusOutlined />} type='primary' onClick={() => setIsNewEntryEditActive(true)} />
-          </FormItem>
-          : <div>{customLabels.map((label, index) => (
-            <div key={Math.random()} style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
-              <div style={{ margin: '0 1rem 0 2rem', width: '100%', maxWidth: '154px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
-              <Input
-                defaultValue=''
-                onChange={e => {
-                  newItemData.current[index] = e.target.value;
-                }}
-              />
-            </div>
-          ))}
-            {newAudios.length > 0 ? <Divider plain dashed>Audios</Divider> : null}
-            {newAudios.map((arr, index) => !isCC0Music
-              ? (
-                <div key={Math.random()}>
-                  <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}><Input value={arr[0]} onChange={() => { }} /></FormItem>
-                  <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}><UrlInput value={arr[1]} onChange={() => { }} /></FormItem>
-                </div>
-              )
-              : <div key={Math.random()}>
-                <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}><Input value={arr[0]} onChange={() => { }} /></FormItem>
-                <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}><UrlInput value={arr[2]} onChange={() => { }} /></FormItem>
-                <FormItem {...FORM_ITEM_LAYOUT} label={`BSB-URL ${index + 1}`}><Input value={arr[1]} onChange={() => { }} /></FormItem>
-              </div>)}
-            <Button
-              icon={<PlusOutlined />}
-              type='primary'
-              style={{ marginLeft: '32px', marginTop: '16px' }}
-              onClick={() => {
-                setNewAudios(prev => {
-                  const currentNewAudios = [...prev];
-                  currentNewAudios.push(getAudioTemplate());
-                  return currentNewAudios;
-                });
-              }}
-            >Audio
-            </Button>
-            <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
-              <Button
-                type='default'
-                onClick={() => { setIsNewEntryEditActive(false); }}
-              >{t('common:cancel')}
-              </Button>
-              <Button
-                type='primary'
-                onClick={() => {
-                  setIsNewEntryEditActive(false);
-                  const newCsvData = cloneDeep(csvData);
-                  newCsvData.push(newItemData.current);
-
-                  const csvDataLabels = newCsvData.shift();
-                  newCsvData.sort((a, b) => a[0].localeCompare(b[0]));
-                  newCsvData.splice(0, 0, csvDataLabels);
-
-                  updateContent({ csvData: newCsvData });
-                  newItemData.current = customLabels.map(() => '');
-                }}
-              >{t('save')}
-              </Button>
-            </div>
-          </div>}
-      </Form >
-    </div >
+        <DragAndDropContainer
+          droppableId={droppableIdRef.current}
+          items={dragAndDropLabels}
+          onItemMove={handleMoveLabel}
+        />
+        {renderCustomListEditor()}
+      </Form>
+    </div>
   );
+
 }
 
 ListEditor.propTypes = {

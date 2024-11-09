@@ -67,6 +67,14 @@
     "save": {
       "en": "Save Item",
       "de": "Datensatz speichern"
+    },
+    "createNewList": {
+      "en": "Create new list manually",
+      "de": "Neue Liste manuell anlegen"
+    },
+    "customList": {
+      "en": "Custom list",
+      "de": "Eigene Liste"
     }
   }
 }
