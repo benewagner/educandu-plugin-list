@@ -75,6 +75,14 @@
     "customList": {
       "en": "Custom list",
       "de": "Eigene Liste"
+    },
+    "property": {
+      "en": "Property",
+      "de": "Eigenschaft"
+    },
+    "newProperty": {
+      "en": "New Property",
+      "de": "Neue Eigenschaft"
     }
   }
 }

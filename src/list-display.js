@@ -84,12 +84,12 @@ export default function ListDisplay({ content }) {
     <React.Fragment>
       <div>{`${t('searchWithin')}:`}</div>
       <div className="List-checkableTags">
-        {tagsData.map(tag => (
+        {tagsData.map((tag, index) => (
           <CheckableTag
-            key={tag}
+            key={tag + index}
             checked={selectedTags.includes(tag)}
             onChange={checked => handleChange(tag, checked)}
-            >
+          >
             {tag}
           </CheckableTag>
         ))}
@@ -103,7 +103,7 @@ export default function ListDisplay({ content }) {
       return;
     }
     filterData(inputRef.current.input.value);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTags]);
 
   return (

@@ -39,7 +39,7 @@ function ListItem({ itemArray, isCC0Music, customLabels, firstTrackDataIndex, ar
   const renderInfos = () => (
     <div className="List-listItemInfos">
       <ul style={{ listStyle: 'none' }}>
-        {customLabels.map((label, i) => i > 0 && itemArray[i] !== '' ? <li key={`${itemArray[0]}-${i}`}><span style={{ fontWeight: 'bold' }}>{`${label}: `}</span>{itemArray[i]}</li> : null)}
+        {customLabels.map((label, i) => i > 0 && itemArray[i] !== '' ? <li key={`${label}-${i}`}><span style={{ fontWeight: 'bold' }}>{`${label}: `}</span>{itemArray[i]}</li> : null)}
       </ul>
       {isCC0Music ? renderTracks() : null}
     </div>

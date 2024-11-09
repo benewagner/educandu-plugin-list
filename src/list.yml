@@ -56,3 +56,12 @@ benewagner/educandu-plugin-list:
   customList:
     en: Custom list
     de: Eigene Liste
+  newProperty:
+    en: New property
+    de: Neue Eigenschaft
+  property:
+    en: Property
+    de: Eigenschaft
+  newProperty:
+    en: New Property
+    de: Neue Eigenschaft

@@ -13,6 +13,7 @@ import { CloudUploadOutlined, DownloadOutlined, PlusOutlined } from '@ant-design
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
 import DragAndDropContainer from '@educandu/educandu/components/drag-and-drop-container.js';
 import { swapItemsAt, removeItemAt, moveItem } from '@educandu/educandu/utils/array-utils.js';
+import CustomCSVLabel from './custom-csv-label.js';
 
 const { Dragger } = Upload;
 const logger = new Logger(import.meta.url);
@@ -23,13 +24,12 @@ export default function ListEditor({ content, onContentChanged }) {
   const { t } = useTranslation('benewagner/educandu-plugin-list');
   const [isCheckBoxChanged, setIsCheckboxChanged] = useState(false);
   const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
-  const { listName, csvData, isCC0Music, customLabels, renderSearch } = content;
+  const { listName, csvData, isCC0Music, customLabels, renderSearch, isCustomList } = content;
 
   const [triggerRender, setTriggerRender] = useState(false);
 
-  // Don't render file upload component when list has been manually created
-  const [isCustomList, setIsCustomList] = useState(false);
-  const [hasListBeenCreated, setHasListBeenCreated] = useState(false);
+  // const [hasListBeenCreated, setHasListBeenCreated] = useState(false);
+  const hasListBeenCreated = customLabels.length > 0;
 
   const FormItem = Form.Item;
   const encodingRef = useRef(null);
@@ -39,7 +39,12 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const getAudioTemplate = () => isCC0Music ? ['', '', '',] : ['', ''];
 
-  // const [newAudios, setNewAudios] = useState([]);
+  const customListLabelKeys = useRef([]);
+  if (isCustomList) {
+    while (customLabels.length > customListLabelKeys.current.length) {
+      customListLabelKeys.current.push(uniqueId.create());
+    }
+  }
   const newAudios = useRef([]);
   const [audioUrls, setAudioUrls] = useState([]);
 
@@ -67,7 +72,7 @@ export default function ListEditor({ content, onContentChanged }) {
         displayData.splice(0, 0, csvDataLabels);
         const newCustomLabels = isCC0Music ? displayData[0].filter(label => !filterRegex.test(label)) : displayData[0];
         updateContent({ csvData: displayData, customLabels: newCustomLabels });
-        setHasListBeenCreated(true);
+        // setHasListBeenCreated(true);
         onSuccess();
       },
       error: error => {
@@ -134,6 +139,13 @@ export default function ListEditor({ content, onContentChanged }) {
     updateContent({ customLabels: newCustomLabels });
   };
 
+  const handleCustomLabelChanged = (event, index) => {
+    const { value } = event.target;
+    const newCustomLabels = cloneDeep(customLabels);
+    newCustomLabels[index] = value;
+    updateContent({ customLabels: newCustomLabels });
+  };
+
   const handleMoveLabelUp = index => {
     const newCsvData = csvData.map(row => swapItemsAt(row, index, index - 1));
     const newCustomLabels = swapItemsAt(customLabels, index, index - 1);
@@ -191,7 +203,7 @@ export default function ListEditor({ content, onContentChanged }) {
     return (
       <React.Fragment>
         <CSVLabel
-          key={label + index}
+          key={label}
           index={index}
           arrayLength={arrayLength}
           isDragged={isDragged}
@@ -212,15 +224,41 @@ export default function ListEditor({ content, onContentChanged }) {
     );
   };
 
+  const renderCustomListCsvData = ({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength }) => {
+
+    return (
+      <React.Fragment>
+        <CustomCSVLabel
+          key={label}
+          index={index}
+          arrayLength={arrayLength}
+          isDragged={isDragged}
+          isOtherDragged={isOtherDragged}
+          dragHandleProps={dragHandleProps}
+          onMoveUp={handleMoveLabelUp}
+          onMoveDown={handleMoveLabelDown}
+          onDelete={handleDeleteLabel}
+          itemsCount={customLabels.length}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
+            <div style={{ margin: '0 1rem 0 2rem', width: '100%', maxWidth: '154px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label !== '' ? `${label}:` : `[${t('new')}]:`}</div>
+            <Input value={customLabels[index]} onChange={e => handleCustomLabelChanged(e, index)} />
+          </div>
+        </CustomCSVLabel>
+        {index === 0 ? <Divider plain>{t('foldOutContent')}</Divider> : null}
+      </React.Fragment>
+    );
+  };
+
   const getDragAndDropListItems = () => csvData[0]?.map((label, index) => ({
-    key: label !== '' ? label + index : `new-label-${index}`,
+    key: `new-label-${index}`,
     render: ({ dragHandleProps, isDragged, isOtherDragged }) => renderCsvData({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength: customLabels.length })
   })).filter(elem => isCC0Music ? !filterRegex.test(elem.key) : true);
 
   const getDragAndDropCustomListItems = () => customLabels?.map((label, index) => ({
-    key: label !== '' ? label + index : `new-label-${index}`,
-    render: ({ dragHandleProps, isDragged, isOtherDragged }) => renderCsvData({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength: customLabels.length })
-  })).filter(elem => isCC0Music ? !filterRegex.test(elem.key) : true);
+    key: `new-label-${index}`,
+    render: ({ dragHandleProps, isDragged, isOtherDragged }) => renderCustomListCsvData({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength: customLabels.length })
+  }));
 
   let dragAndDropCustomListLabels = [];
   let dragAndDropLabels = [];
@@ -252,22 +290,29 @@ export default function ListEditor({ content, onContentChanged }) {
         items={dragAndDropCustomListLabels}
         onItemMove={handleMoveLabel}
       />
-      {console.log(dragAndDropLabels)}
+      <FormItem {...FORM_ITEM_LAYOUT}>
+        <Button
+          icon={<PlusOutlined />}
+          type='primary'
+          onClick={() => { updateContent({ customLabels: [...customLabels, t('newProperty')] }); }}
+        >
+          {t('property')}
+        </Button>
+      </FormItem>
     </div>
   );
 
   const renderCustomListEditor = () => (
     <React.Fragment>
-      {!hasListBeenCreated
+      {!hasListBeenCreated && !isCustomList
         ? (
           <FormItem {...FORM_ITEM_LAYOUT}>
             <Button
               icon={<PlusOutlined />}
               type='primary'
               onClick={() => {
-                setIsCustomList(true);
-                setHasListBeenCreated(true);
-                updateContent({ customLabels: ['Neues Label', 'Neues Label'] });
+                // setHasListBeenCreated(true);
+                updateContent({ customLabels: [t('newProperty'), t('newProperty')], isCustomList: true });
               }}
             >
               {t('createNewList')}
@@ -278,7 +323,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
       {isCustomList ? <Divider plain>{t('customList')}</Divider> : null}
 
-      {isCustomList && renderCustomListLabels()}
+      {isCustomList ? renderCustomListLabels() : null}
 
       {hasListBeenCreated ? <Divider plain>{t('newItem')}</Divider> : null}
 
@@ -435,7 +480,7 @@ export default function ListEditor({ content, onContentChanged }) {
           items={dragAndDropLabels}
           onItemMove={handleMoveLabel}
         />
-        {renderCustomListEditor()}
+        {isCustomList && renderCustomListEditor()}
       </Form>
     </div>
   );

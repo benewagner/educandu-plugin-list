@@ -51,7 +51,8 @@ class ListInfo {
       items: [],
       searchTags: [],
       isCC0Music: false,
-      renderSearch: true
+      renderSearch: true,
+      isCustomList: false
     };
   }
 
@@ -64,7 +65,8 @@ class ListInfo {
       csvData: joi.array(),
       customLabels: joi.array(),
       isCC0Music: joi.boolean().required(),
-      renderSearch: joi.boolean().required()
+      renderSearch: joi.boolean().required(),
+      isCustomList: joi.boolean()
     });
 
     joi.attempt(content, schema, { abortEarly: false, convert: false, noDefaults: true });
