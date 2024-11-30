@@ -62,6 +62,3 @@ benewagner/educandu-plugin-list:
   property:
     en: Property
     de: Eigenschaft
-  newProperty:
-    en: New Property
-    de: Neue Eigenschaft

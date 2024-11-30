@@ -434,19 +434,21 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const renderDragger = () => (
 
-    <React.Fragment><FormItem label={t('csvImport')} {...FORM_ITEM_LAYOUT}>
-      <Dragger {...props}>
-        <p className="ant-upload-drag-icon">
-          <CloudUploadOutlined />
-        </p>
-        <p className="ant-upload-text">{t('uploadCsvFile')}</p>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <p className="EmptyState-buttonSubtext List-buttonSubtext">
-            {t('dragAndDropOrClick')}
+    <React.Fragment>
+      <FormItem label={t('csvImport')} {...FORM_ITEM_LAYOUT}>
+        <Dragger {...props}>
+          <p className="ant-upload-drag-icon">
+            <CloudUploadOutlined />
           </p>
-        </div>
-      </Dragger>
-    </FormItem><FormItem label={t('csvExport')} {...FORM_ITEM_LAYOUT}>
+          <p className="ant-upload-text">{t('uploadCsvFile')}</p>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <p className="EmptyState-buttonSubtext List-buttonSubtext">
+              {t('dragAndDropOrClick')}
+            </p>
+          </div>
+        </Dragger>
+      </FormItem>
+      <FormItem label={t('csvExport')} {...FORM_ITEM_LAYOUT}>
         <Button icon={<DownloadOutlined />} onClick={downloadCSV}>Download CSV</Button>
       </FormItem>
     </React.Fragment>
