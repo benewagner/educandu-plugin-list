@@ -83,6 +83,45 @@
     "property": {
       "en": "Property",
       "de": "Eigenschaft"
+<<<<<<< HEAD
+=======
+    },
+    "trackTitle": {
+      "en": "Track title",
+      "de": "Track-Titel"
+    },
+    "trackUrl": {
+      "en": "Track URL",
+      "de": "Track-URL"
+    },
+    "bsbUrl": {
+      "en": "BSB URL",
+      "de": "BSB-URL"
+    },
+    "edit": {
+      "en": "Edit",
+      "de": "Bearbeiten"
+    },
+    "item": {
+      "en": "Item",
+      "de": "Datensatz"
+    },
+    "items": {
+      "en": "Items",
+      "de": "Datensätze"
+    },
+    "editItem": {
+      "en": "Edit item",
+      "de": "Datensatz bearbeiten"
+    },
+    "newTitle": {
+      "en": "New title",
+      "de": "Neuer Titel"
+    },
+    "newUrl": {
+      "en": "New URL",
+      "de": "Neue URL"
+>>>>>>> update-list
     }
   }
 }

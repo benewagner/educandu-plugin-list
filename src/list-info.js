@@ -46,23 +46,31 @@ class ListInfo {
 
   getDefaultContent() {
     return {
-      itemTemplate: {
-        display: '',
-        inputs: []
-      },
       csvData: [[]],
-      customLabels: [],
       listName: '',
+<<<<<<< HEAD
       items: [],
       searchTags: [],
       isCC0Music: false,
       renderSearch: true,
       isCustomList: false
+=======
+      renderSearch: true
+      // itemTemplate: {
+      //   display: '',
+      //   inputs: []
+      // },
+      // customLabels: [],
+      // items: [],
+      // searchTags: [],
+      // isCC0Music: false,
+>>>>>>> update-list
     };
   }
 
   validateContent(content) {
     const schema = joi.object({
+<<<<<<< HEAD
       itemTemplate: joi.object(),
       listName: joi.string().allow('').required(),
       items: joi.array().required(),
@@ -72,6 +80,17 @@ class ListInfo {
       isCC0Music: joi.boolean().required(),
       renderSearch: joi.boolean().required(),
       isCustomList: joi.boolean()
+=======
+      csvData: joi.array().required(),
+      renderSearch: joi.boolean().required(),
+      listName: joi.string().allow('').required()
+      // itemTemplate: joi.object(),
+      // items: joi.array().required(),
+      // searchTags: joi.array(),
+      // customLabels: joi.array(),
+      // isCC0Music: joi.boolean().required(),
+      // isCustomList: joi.boolean()
+>>>>>>> update-list
     });
 
     joi.attempt(content, schema, { abortEarly: false, convert: false, noDefaults: true });
@@ -81,14 +100,8 @@ class ListInfo {
     return cloneDeep(content);
   }
 
-  redactContent(content, targetRoomId) {
+  redactContent(content) {
     const redactedContent = cloneDeep(content);
-
-    redactedContent.text = this.gfm.redactCdnResources(
-      redactedContent.text,
-      url => couldAccessUrlFromRoom(url, targetRoomId) ? url : ''
-    );
-
     return redactedContent;
   }
 
