@@ -3,7 +3,6 @@ import React from 'react';
 import ListIcon from './list-icon.js';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
-import { PLUGIN_GROUP } from '@educandu/educandu/domain/constants.js';
 import { couldAccessUrlFromRoom } from '@educandu/educandu/utils/source-utils.js';
 import GithubFlavoredMarkdown from '@educandu/educandu/common/github-flavored-markdown.js';
 
@@ -22,10 +21,6 @@ class ListInfo {
 
   getIcon() {
     return <ListIcon />;
-  }
-
-  getGroups() {
-    return [PLUGIN_GROUP.mostUsed, PLUGIN_GROUP.other];
   }
 
   async resolveDisplayComponent() {
@@ -48,13 +43,6 @@ class ListInfo {
     return {
       csvData: [[]],
       listName: '',
-<<<<<<< HEAD
-      items: [],
-      searchTags: [],
-      isCC0Music: false,
-      renderSearch: true,
-      isCustomList: false
-=======
       renderSearch: true
       // itemTemplate: {
       //   display: '',
@@ -64,23 +52,11 @@ class ListInfo {
       // items: [],
       // searchTags: [],
       // isCC0Music: false,
->>>>>>> update-list
     };
   }
 
   validateContent(content) {
     const schema = joi.object({
-<<<<<<< HEAD
-      itemTemplate: joi.object(),
-      listName: joi.string().allow('').required(),
-      items: joi.array().required(),
-      searchTags: joi.array(),
-      csvData: joi.array(),
-      customLabels: joi.array(),
-      isCC0Music: joi.boolean().required(),
-      renderSearch: joi.boolean().required(),
-      isCustomList: joi.boolean()
-=======
       csvData: joi.array().required(),
       renderSearch: joi.boolean().required(),
       listName: joi.string().allow('').required()
@@ -90,7 +66,6 @@ class ListInfo {
       // customLabels: joi.array(),
       // isCC0Music: joi.boolean().required(),
       // isCustomList: joi.boolean()
->>>>>>> update-list
     });
 
     joi.attempt(content, schema, { abortEarly: false, convert: false, noDefaults: true });

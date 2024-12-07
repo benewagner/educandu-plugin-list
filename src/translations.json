@@ -83,8 +83,6 @@
     "property": {
       "en": "Property",
       "de": "Eigenschaft"
-<<<<<<< HEAD
-=======
     },
     "trackTitle": {
       "en": "Track title",
@@ -121,7 +119,6 @@
     "newUrl": {
       "en": "New URL",
       "de": "Neue URL"
->>>>>>> update-list
     }
   }
 }

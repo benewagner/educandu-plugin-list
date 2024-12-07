@@ -14,7 +14,6 @@ import { CloudUploadOutlined, DownloadOutlined, PlusOutlined } from '@ant-design
 import { Form, Upload, Button, Radio, Input, Divider, Switch, InputNumber } from 'antd';
 import DragAndDropContainer from '@educandu/educandu/components/drag-and-drop-container.js';
 import { swapItemsAt, removeItemAt, moveItem } from '@educandu/educandu/utils/array-utils.js';
-import CustomCSVLabel from './custom-csv-label.js';
 
 const { Dragger } = Upload;
 const logger = new Logger(import.meta.url);

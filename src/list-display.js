@@ -109,11 +109,7 @@ export default function ListDisplay({ content }) {
     <React.Fragment>
       <div>{`${t('searchWithin')}:`}</div>
       <div className="List-checkableTags">
-<<<<<<< HEAD
-        {tagsData.map((tag, index) => (
-=======
         {tagsData.filter(tag => !tag.includes('track-title-')).map((tag, index) => (
->>>>>>> update-list
           <CheckableTag
             key={tag + index}
             checked={selectedTags.includes(tag)}
