@@ -1,5 +1,5 @@
 import { Input, Tag } from 'antd';
-import ListItem from './list-item.js';
+import ListItem from './list-item2.js';
 import { useTranslation } from 'react-i18next';
 import React, { useState, useRef, useEffect } from 'react';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
@@ -13,14 +13,8 @@ export default function ListDisplay({ content }) {
   const inputRef = useRef(null);
   const { t } = useTranslation('benewagner/educandu-plugin-list');
   const archivedByBSB = t('archivedByBSB');
-  // const { csvData, customLabels, isCC0Music, listName, renderSearch } = content;
-  // const { csvData, isCC0Music, listName, renderSearch } = content;
-  const { csvData, listName, renderSearch } = content;
-  const isCC0Music = csvData[0].includes('bsb-url-1');
-  const customLabels = csvData?.[0];
-  const tagsData = customLabels.filter(tag => !tag.includes('track-url-') && !tag.includes('bsb-url-'));
-
-  const filteredDataElemIndices = useRef([]);
+  const { csvData, customLabels, isCC0Music, listName, renderSearch } = content;
+  const tagsData = customLabels;
 
   const customLabelsIndices = {};
   for (let i = 0; i < customLabels.length; i += 1) {
@@ -34,16 +28,10 @@ export default function ListDisplay({ content }) {
   };
 
   const [isFiltered, setIsFiltered] = useState(false);
-  const firstTrackDataIndex = csvData[0].findIndex(elem => elem.includes('track-title-'));
+  const firstTrackDataIndex = csvData[0].indexOf('track-1');
   const unfilteredCsvDataRef = useRef(getInitialCsvDisplayData());
 
-  const [selectedTags, setSelectedTags] = useState(() => {
-    const arr = cloneDeep(tagsData);
-    if (tagsData.find(tag => tag.includes('track-title-'))) {
-      arr.push(t('trackTitle'));
-    }
-    return arr;
-  });
+  const [selectedTags, setSelectedTags] = useState(tagsData);
   const [displayCsvData, setDisplayCsvData] = useState(cloneDeep(unfilteredCsvDataRef.current));
 
   const areSetsEqual = (set1, set2) => {
@@ -59,19 +47,17 @@ export default function ListDisplay({ content }) {
   };
 
   const filterData = string => {
-    filteredDataElemIndices.current = [];
     const inputText = string.trim().replace(/\s+/g, ' ').toLowerCase();
     const values = inputText.split(' ');
     const valuesSet = new Set(values);
     if (inputText.length > 2) {
-      const newData = unfilteredCsvDataRef.current.filter((item, index) => {
+      const newData = unfilteredCsvDataRef.current.filter(item => {
         const foundValuesSet = new Set();
         for (const value of values) {
           for (const tag of selectedTags) {
-            if (item[customLabelsIndices[tag]]?.toLowerCase().includes(value)) {
+            if (item[customLabelsIndices[tag]].toLowerCase().includes(value)) {
               foundValuesSet.add(value);
               if (areSetsEqual(valuesSet, foundValuesSet)) {
-                filteredDataElemIndices.current.push(index);
                 return true;
               }
             }
@@ -88,17 +74,6 @@ export default function ListDisplay({ content }) {
   };
 
   const handleChange = (tag, checked) => {
-
-    if (tag === t('trackTitle')) {
-      const trackTitleTags = tagsData.filter(elem => elem.includes('track-title-'));
-      let nextSelectedTags = checked
-        ? [...selectedTags, ...trackTitleTags]
-        : selectedTags.filter(tagElem => !trackTitleTags.includes(tagElem));
-      checked ? nextSelectedTags.push(t('trackTitle')) : nextSelectedTags = nextSelectedTags.filter(elem => elem !== t('trackTitle'));
-      setSelectedTags(nextSelectedTags);
-      return;
-    }
-
     const nextSelectedTags = checked
       ? [...selectedTags, tag]
       : selectedTags.filter(tagElem => tagElem !== tag);
@@ -109,23 +84,15 @@ export default function ListDisplay({ content }) {
     <React.Fragment>
       <div>{`${t('searchWithin')}:`}</div>
       <div className="List-checkableTags">
-        {tagsData.filter(tag => !tag.includes('track-title-')).map((tag, index) => (
+        {tagsData.map(tag => (
           <CheckableTag
-            key={tag + index}
+            key={tag}
             checked={selectedTags.includes(tag)}
             onChange={checked => handleChange(tag, checked)}
           >
             {tag}
           </CheckableTag>
         ))}
-        {tagsData.find(tag => tag.includes('track-title-'))
-          ? <CheckableTag
-            checked={selectedTags.includes(t('trackTitle'))}
-            onChange={checked => handleChange(t('trackTitle'), checked)}
-          >
-            {t('trackTitle')}
-          </CheckableTag>
-          : null}
       </div>
       <Input ref={inputRef} onChange={e => filterData(e.target.value)} allowClear style={{ maxWidth: '300px' }} />
     </React.Fragment>
@@ -144,7 +111,7 @@ export default function ListDisplay({ content }) {
       {listName !== '' ? <h1>{listName}</h1> : null}
       {renderSearch ? renderSearchBar() : null}
       <div>
-        {displayCsvData.map((arr, index) => <ListItem key={uniqueId.create()} itemArray={arr} customLabels={customLabels} isCC0Music={isCC0Music} firstTrackDataIndex={firstTrackDataIndex} archivedByBSB={archivedByBSB} index={isFiltered ? filteredDataElemIndices.current[index] : index} />)}
+        {displayCsvData.map(arr => <ListItem key={uniqueId.create()} itemArray={arr} customLabels={customLabels} isCC0Music={isCC0Music} firstTrackDataIndex={firstTrackDataIndex} archivedByBSB={archivedByBSB} />)}
       </div>
     </div>
   );
