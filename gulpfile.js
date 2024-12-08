@@ -18,12 +18,12 @@ import {
   NodeProcess
 } from '@educandu/dev-tools';
 
+process.env.NODE_ENV ||= 'development';
+
 let currentApp = null;
 let isInWatchMode = false;
 let currentCdnProxy = null;
 let currentAppBuildContext = null;
-
-process.env.NODE_ENV ||= 'development';
 
 const testAppEnv = {
   TEST_APP_PORT: '3000',
