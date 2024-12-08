@@ -3,7 +3,8 @@ import React from 'react';
 import ListIcon from './list-icon.js';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
-import { couldAccessUrlFromRoom } from '@educandu/educandu/utils/source-utils.js';
+import { PLUGIN_GROUP } from '@educandu/educandu/domain/constants.js';
+// import { couldAccessUrlFromRoom } from '@educandu/educandu/utils/source-utils.js';
 import GithubFlavoredMarkdown from '@educandu/educandu/common/github-flavored-markdown.js';
 
 class ListInfo {
@@ -21,6 +22,10 @@ class ListInfo {
 
   getIcon() {
     return <ListIcon />;
+  }
+
+  getGroups() {
+    return [PLUGIN_GROUP.mostUsed, PLUGIN_GROUP.other];
   }
 
   async resolveDisplayComponent() {
