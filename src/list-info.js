@@ -25,7 +25,7 @@ class ListInfo {
   }
 
   getGroups() {
-    return [PLUGIN_GROUP.mostUsed, PLUGIN_GROUP.other];
+    return [PLUGIN_GROUP.other];
   }
 
   async resolveDisplayComponent() {
@@ -49,14 +49,6 @@ class ListInfo {
       csvData: [[]],
       listName: '',
       renderSearch: true
-      // itemTemplate: {
-      //   display: '',
-      //   inputs: []
-      // },
-      // customLabels: [],
-      // items: [],
-      // searchTags: [],
-      // isCC0Music: false,
     };
   }
 
@@ -65,12 +57,6 @@ class ListInfo {
       csvData: joi.array().required(),
       renderSearch: joi.boolean().required(),
       listName: joi.string().allow('').required()
-      // itemTemplate: joi.object(),
-      // items: joi.array().required(),
-      // searchTags: joi.array(),
-      // customLabels: joi.array(),
-      // isCC0Music: joi.boolean().required(),
-      // isCustomList: joi.boolean()
     });
 
     joi.attempt(content, schema, { abortEarly: false, convert: false, noDefaults: true });

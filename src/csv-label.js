@@ -7,7 +7,7 @@ import DeleteIcon from '@educandu/educandu/components/icons/general/delete-icon.
 import MoveUpIcon from '@educandu/educandu/components/icons/general/move-up-icon.js';
 import MoveDownIcon from '@educandu/educandu/components/icons/general/move-down-icon.js';
 
-function CSVLabel({
+function CustomCSVLabel({
   index,
   children,
   onMoveUp,
@@ -111,7 +111,7 @@ function CSVLabel({
   );
 }
 
-CSVLabel.propTypes = {
+CustomCSVLabel.propTypes = {
   arrayLength: PropTypes.number.isRequired,
   canDeleteLastItem: PropTypes.bool,
   children: PropTypes.node.isRequired,
@@ -134,7 +134,7 @@ CSVLabel.propTypes = {
   onMoveUp: PropTypes.func
 };
 
-CSVLabel.defaultProps = {
+CustomCSVLabel.defaultProps = {
   canDeleteLastItem: false,
   extraActionButtons: [],
   header: '',
@@ -149,4 +149,4 @@ CSVLabel.defaultProps = {
   onMoveUp: null
 };
 
-export default CSVLabel;
+export default CustomCSVLabel;

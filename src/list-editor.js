@@ -1,8 +1,7 @@
 import Papa from 'papaparse';
 import jschardet from 'jschardet';
-import CSVLabel from './csv-label.js';
 import { useTranslation } from 'react-i18next';
-import CustomCSVLabel from './custom-csv-label.js';
+import CSVLabel from './csv-label.js';
 import Logger from '@educandu/educandu/common/logger.js';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
@@ -24,11 +23,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const droppableIdRef = useRef(useId());
   const { t } = useTranslation('benewagner/educandu-plugin-list');
-  // const [isCheckBoxChanged, setIsCheckboxChanged] = useState(false);
   const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
-  // const { listName, csvData, isCC0Music, customLabels, renderSearch, hasCsvData } = content;
-  // const { listName, csvData, isCC0Music, renderSearch, hasCsvData } = content;
-  // const { listName, csvData, isCC0Music, renderSearch } = content;
   const { listName, csvData, renderSearch } = content;
   const isCC0Music = csvData[0].includes('bsb-url-1');
 
@@ -49,7 +44,6 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const FormItem = Form.Item;
   const encodingRef = useRef(null);
-  const filterRegex = /^(?:track-title|bsb-url|track-url)-[1-9]\d?$/;
 
   const newItemData = useRef(customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map(() => ''));
 
@@ -88,8 +82,6 @@ export default function ListEditor({ content, onContentChanged }) {
         const csvDataLabels = displayData.shift();
         displayData.sort((a, b) => a[0].localeCompare(b[0]));
         displayData.splice(0, 0, csvDataLabels);
-        // const newCustomLabels = displayData[0].filter(label => !filterRegex.test(label));
-        // updateContent({ csvData: displayData, customLabels: newCustomLabels });
         updateContent({ csvData: displayData });
         onSuccess();
       },
@@ -150,55 +142,37 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const handleListNameChanged = event => updateContent({ listName: event.target.value });
 
-  const handleLabelChanged = (event, index) => {
-    const { value } = event.target;
-    const newCustomLabels = cloneDeep(customLabels);
-    newCustomLabels[index] = value;
-    updateContent({ customLabels: newCustomLabels });
-  };
-
   const handleCustomLabelChanged = (event, index) => {
     const { value } = event.target;
     const newCsvData = cloneDeep(csvData);
-    const newCustomLabels = cloneDeep(customLabels);
     newCsvData[0][index] = value;
-    newCustomLabels[index] = value;
-    updateContent({ customLabels: newCustomLabels, csvData: newCsvData });
+    updateContent({ csvData: newCsvData });
   };
 
   const handleMoveLabelUp = index => {
     const newCsvData = csvData.map(row => swapItemsAt(row, index, index - 1));
-    const newCustomLabels = swapItemsAt(customLabels, index, index - 1);
-    updateContent({ csvData: newCsvData, customLabels: newCustomLabels });
+    updateContent({ csvData: newCsvData });
   };
 
   const handleMoveLabelDown = index => {
     const newCsvData = csvData.map(row => swapItemsAt(row, index, index + 1));
-    const newCustomLabels = swapItemsAt(customLabels, index, index + 1);
-    updateContent({ csvData: newCsvData, customLabels: newCustomLabels });
+    updateContent({ csvData: newCsvData });
   };
 
   const handleDeleteLabel = index => {
     const newCsvData = csvData.map(row => removeItemAt(row, index));
-    const newCustomLabels = removeItemAt(customLabels, index);
-    updateContent({ csvData: newCsvData, customLabels: newCustomLabels });
+    updateContent({ csvData: newCsvData });
   };
 
   const handleMoveLabel = (fromIndex, toIndex) => {
     const displayData = csvData.map(row => moveItem(row, fromIndex, toIndex));
-    const newCustomLabels = moveItem(customLabels, fromIndex, toIndex);
     const lastRow = displayData[displayData.length - 1];
     lastRow.length === 1 && lastRow[0] === '' ? displayData.splice(-1, 1) : null;
     const csvDataLabels = displayData.shift();
     displayData.sort((a, b) => a[0].localeCompare(b[0]));
     displayData.splice(0, 0, csvDataLabels);
-    updateContent({ csvData: displayData, customLabels: newCustomLabels });
+    updateContent({ csvData: displayData });
   };
-
-  // const handleUpdateCC0MusicChanged = e => {
-  //   updateContent({ isCC0Music: e });
-  //   setIsCheckboxChanged(true);
-  // };
 
   const downloadCSV = () => {
     if (!window) {
@@ -218,37 +192,11 @@ export default function ListEditor({ content, onContentChanged }) {
     window.URL.revokeObjectURL(blobURL);
   };
 
-  const renderCsvData = ({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength }) => {
-
-    return (
-      <React.Fragment>
-        <CSVLabel
-          key={label + index}
-          index={index}
-          arrayLength={arrayLength}
-          isDragged={isDragged}
-          isOtherDragged={isOtherDragged}
-          dragHandleProps={dragHandleProps}
-          onMoveUp={handleMoveLabelUp}
-          onMoveDown={handleMoveLabelDown}
-          onDelete={handleDeleteLabel}
-          itemsCount={customLabels.length}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
-            <div style={{ margin: '0 1rem 0 2rem', width: '100%', maxWidth: '154px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label !== '' ? `${label}:` : `[${t('new')}]:`}</div>
-            <Input value={customLabels[index]} onChange={e => handleLabelChanged(e, index)} />
-          </div>
-        </CSVLabel>
-        {index === 0 ? <Divider plain>{t('foldOutContent')}</Divider> : null}
-      </React.Fragment>
-    );
-  };
-
   const renderCustomListCsvData = ({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength }) => {
 
     return (
       <React.Fragment>
-        <CustomCSVLabel
+        <CSVLabel
           key={customListLabelKeys.current[index]}
           index={index}
           arrayLength={arrayLength}
@@ -267,16 +215,11 @@ export default function ListEditor({ content, onContentChanged }) {
               onChange={e => handleCustomLabelChanged(e, index)}
             />
           </div>
-        </CustomCSVLabel>
+        </CSVLabel>
         {index === 0 ? <Divider plain>{t('foldOutContent')}</Divider> : null}
       </React.Fragment>
     );
   };
-
-  const getDragAndDropListItems = () => csvData[0]?.map((label, index) => ({
-    key: `new-label-${index}`,
-    render: ({ dragHandleProps, isDragged, isOtherDragged }) => renderCsvData({ label, index, dragHandleProps, isDragged, isOtherDragged, arrayLength: customLabels.length })
-  })).filter(elem => !filterRegex.test(elem.key));
 
   const getDragAndDropCustomListItems = () => customLabels?.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map((label, index) => ({
     key: `new-label-${index}`,
@@ -284,26 +227,10 @@ export default function ListEditor({ content, onContentChanged }) {
   }));
 
   let dragAndDropCustomListLabels = [];
-  let dragAndDropLabels = [];
 
   if (hasCsvData) {
     dragAndDropCustomListLabels = getDragAndDropCustomListItems();
-  } else {
-    dragAndDropLabels = getDragAndDropListItems();
   }
-
-  // useEffect(() => {
-  //   if (!isCheckBoxChanged) {
-  //     return;
-  //   }
-  //   const newCustomLabels = isCC0Music ? csvData[0].filter(label => !filterRegex.test(label)) : csvData[0];
-  //   updateContent({ customLabels: newCustomLabels });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isCC0Music, isCheckBoxChanged]);
-
-  // useEffect(() => {
-  //   console.log(csvData);
-  // }, []);
 
   const renderCustomListLabels = () => (
     <div>
@@ -318,8 +245,6 @@ export default function ListEditor({ content, onContentChanged }) {
           icon={<PlusOutlined />}
           type='primary'
           onClick={() => {
-            // const newCsvData = cloneDeep(csvData);
-            // newCsvData[0].push(t('newProperty'));
 
             const newCsvData = csvData.map((arr, index) => {
               const newValue = index === 0 ? t('newProperty') : '';
@@ -331,7 +256,6 @@ export default function ListEditor({ content, onContentChanged }) {
               return arr;
             });
 
-            // updateContent({ customLabels: [...customLabels, t('newProperty')], csvData: newCsvData });
             updateContent({ csvData: newCsvData });
           }}
         >
@@ -343,8 +267,6 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const renderCustomListEditor = () => (
     <React.Fragment>
-
-      {/* <Divider plain>{t('customList')}</Divider> */}
 
       {renderCustomListLabels()}
 
@@ -437,13 +359,29 @@ export default function ListEditor({ content, onContentChanged }) {
             <Button
               type="primary"
               onClick={() => {
-                console.log(newItemData.current);
                 setIsNewEntryEditActive(false);
 
                 for (const audio of newAudios.current) {
+
+                  let hasInfo = false;
                   for (const dataString of audio) {
-                    newItemData.current.push(dataString);
+                    if (dataString !== '') {
+                      hasInfo = true;
+                    }
                   }
+
+                  if (hasInfo) {
+                    for (const dataString of audio) {
+                      newItemData.current.push(dataString);
+                    }
+                  }
+                }
+
+                if (newItemData.current.every(string => string === '')) {
+                  newAudios.current = [];
+                  setAudioUrls([]);
+                  setTriggerRender(prev => !prev);
+                  return;
                 }
 
                 const newCsvData = cloneDeep(csvData);
@@ -453,25 +391,24 @@ export default function ListEditor({ content, onContentChanged }) {
                 newCsvData.sort((a, b) => a[0].localeCompare(b[0]));
                 newCsvData.splice(0, 0, csvDataLabels);
 
-                // newCsvData.unshift(csvDataLabels);
-
                 if (newAudios.current.length > audioCount) {
 
                   const surplusAudiosCount = newAudios.current.length - audioCount;
 
                   for (let i = audioCount; i < audioCount + surplusAudiosCount; i += 1) {
                     newCsvData[0].push(`track-title-${i}`);
+                    if (isCC0Music) {
+                      newCsvData[0].push(`bsb-url-${i}`);
+                    }
                     newCsvData[0].push(`track-url-${i}`);
                   }
                 }
 
                 newAudios.current = [];
-
-                console.log(newItemData.current);
+                setAudioUrls([]);
 
                 updateContent({ csvData: newCsvData });
                 newItemData.current = customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map(() => '');
-                setAudioUrls([]);
               }}
             >
               {t('save')}
@@ -487,62 +424,29 @@ export default function ListEditor({ content, onContentChanged }) {
     const newValue = isUrl ? e : e.target.value;
     newCsvData[itemToEditIndex][propertyIndex] = newValue;
 
-    let firstTrackPropertyIndexWithValue;
-    let lastTrackPropertyIndexWithValue;
-
-    for (let i = 0; i < newCsvData[itemToEditIndex].length; i += 1) {
-
-      if (newCsvData[itemToEditIndex][i] !== '' && (newCsvData[0][i].includes('track-title-') || newCsvData[0][i].includes('track-url-'))) {
-        if (!firstTrackPropertyIndexWithValue) {
-          firstTrackPropertyIndexWithValue = i;
-        }
-        lastTrackPropertyIndexWithValue = i;
-      }
+    if (newCsvData[itemToEditIndex].every(str => str === '')) {
+      newCsvData.splice(itemToEditIndex, 1);
+      setItemToEditIndex(1);
+      updateContent({ csvData: newCsvData });
+      return;
     }
 
-    const spliceIndices = [];
+    let i = firstTrackDataIndex;
 
-    for (let i = firstTrackDataIndex; i < lastTrackPropertyIndexWithValue; i += 1) {
-      if (newCsvData[0][i].includes('track-title-')) {
-        if (!newCsvData[itemToEditIndex][i] && !newCsvData[itemToEditIndex][i + 1]) {
-          if (isCC0Music && !newCsvData[itemToEditIndex][i + 2]) {
-            spliceIndices.push(i);
+    while (i < newCsvData[itemToEditIndex].length) {
+      if (newCsvData[itemToEditIndex] === '' && newCsvData[itemToEditIndex + 1] === '') {
+        if (isCC0Music) {
+          if (newCsvData[itemToEditIndex + 2] === '') {
+            newCsvData[itemToEditIndex].splice(i, 3);
           }
-          if (!isCC0Music) {
-            spliceIndices.push(i);
-          }
+        } else {
+          newCsvData[itemToEditIndex].splice(i, 2);
         }
-      };
-    }
-
-    for (let i = 0; i < spliceIndices.length; i += 1) {
-      const index = spliceIndices[i];
-      if (isCC0Music) {
-        newCsvData[itemToEditIndex].splice(index, 3);
       } else {
-        newCsvData[itemToEditIndex].splice(index, 2);
+        i += 1;
       }
     }
 
-    const lastIndex = newCsvData[itemToEditIndex].length - 1;
-
-    if (!isCC0Music) {
-      if (newCsvData[itemToEditIndex][lastIndex - 1] === '' && newCsvData[itemToEditIndex][lastIndex] === '') {
-        if (lastIndex - 1 >= firstTrackDataIndex) {
-          newCsvData[itemToEditIndex].splice(lastIndex - 1, 2);
-        }
-      }
-    }
-
-    if (isCC0Music) {
-      if (newCsvData[itemToEditIndex][lastIndex - 2] === '' && newCsvData[itemToEditIndex][lastIndex - 1] === '' && newCsvData[itemToEditIndex][lastIndex] === '') {
-        if (lastIndex - 2 >= firstTrackDataIndex) {
-          newCsvData[itemToEditIndex].splice(lastIndex - 2, 3);
-        }
-      }
-    }
-
-    console.log(newCsvData[itemToEditIndex]);
     updateContent({ csvData: newCsvData });
   };
 
@@ -553,7 +457,7 @@ export default function ListEditor({ content, onContentChanged }) {
           <InputNumber min={1} max={csvData.length - 1} value={itemToEditIndex} onChange={e => setItemToEditIndex(e)} />
         </FormItem>
         : null}
-      <Divider plain>{t('editItem')}</Divider>
+      <Divider plain>{csvData.length > 1 ? t('editItem') : t('noItemsYet')}</Divider>
       {csvData.length > 1 && csvData[0].map((label, index) => {
         if (index > csvData[itemToEditIndex].length - 1) {
           return null;
@@ -587,16 +491,6 @@ export default function ListEditor({ content, onContentChanged }) {
         type = label.includes('track-url-') ? 'trackUrl' : type;
         type = label.includes('bsb-url-') ? 'bsbUrl' : type;
         let newLabel = label.includes('track-title-') || label.includes('track-url-') || label.includes('bsb-url-') ? t(type) : label;
-        // if (newLabel !== label) {
-        //   const match = csvData[itemToEditIndex][csvData[itemToEditIndex].length - 1].match(/(\d{1,3})$/);
-        //   console.log(match);
-        //   if (match) {
-        //     // const incrementedNumber = Number(match[1]) + 1;
-        //     match ? newLabel = `${newLabel} ${incrementedNumber}` : null;
-        //   } else {
-        //     newLabel = `${newLabel} 1`;
-        //   }
-        // }
 
         if (newLabel !== label) {
           const incrementedNumber = type === 'trackTitle' ? itemToEditAudioCount.current + 1 : itemToEditAudioCount.current;
@@ -629,7 +523,7 @@ export default function ListEditor({ content, onContentChanged }) {
           </React.Fragment>
         );
       })}
-      <Button
+      {csvData.length > 1 && <Button
         icon={<PlusOutlined />}
         type="primary"
         style={{ marginLeft: '32px', marginTop: '16px' }}
@@ -647,8 +541,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
           if (newCsvData[itemToEditIndex].length > newCsvData[0].length) {
             let lastTrackNumber;
-            console.log('serserserser');
-            if (!newCsvData[0].includes('track-title-')) {
+            if (!newCsvData[0].includes('track-title-0')) {
               lastTrackNumber = 0;
             } else {
               lastTrackNumber = Number(newCsvData[0][newCsvData[0].length - 1].match(/(\d{1,3})$/)[1]);
@@ -660,53 +553,68 @@ export default function ListEditor({ content, onContentChanged }) {
             }
             newCsvData[0].push(`track-url-${newTrackNumber}`);
           }
-          console.log(newCsvData);
           updateContent({ csvData: newCsvData });
         }}
       >
         Audio
-      </Button>
-      {/* {console.log(csvData[itemToEditIndex])} */}
+      </Button>}
     </React.Fragment>
   );
 
   const renderDragger = () => (
 
-    <React.Fragment>
-      <FormItem label={t('csvImport')} {...FORM_ITEM_LAYOUT}>
-        <Dragger {...props}>
-          <p className="ant-upload-drag-icon">
-            <CloudUploadOutlined />
+    <FormItem label={t('csvImport')} {...FORM_ITEM_LAYOUT}>
+      <Dragger {...props}>
+        <p className="ant-upload-drag-icon">
+          <CloudUploadOutlined />
+        </p>
+        <p className="ant-upload-text">{t('uploadCsvFile')}</p>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          <p className="EmptyState-buttonSubtext List-buttonSubtext">
+            {t('dragAndDropOrClick')}
           </p>
-          <p className="ant-upload-text">{t('uploadCsvFile')}</p>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <p className="EmptyState-buttonSubtext List-buttonSubtext">
-              {t('dragAndDropOrClick')}
-            </p>
-          </div>
-        </Dragger>
-      </FormItem>
-      <FormItem label={t('csvExport')} {...FORM_ITEM_LAYOUT}>
-        <Button icon={<DownloadOutlined />} onClick={downloadCSV}>Download CSV</Button>
-      </FormItem>
-    </React.Fragment>
+        </div>
+      </Dragger>
+    </FormItem>
   );
 
   useEffect(() => {
 
+    const newContent = cloneDeep(content);
+    const newCsvData = cloneDeep(csvData);
+
     if (Object.keys(content).length > 3) {
       const keys = Object.keys(content);
-      const newContent = cloneDeep(content);
+
       const propsToRemove = keys.filter(key => !['csvData', 'listName', 'renderSearch'].includes(key));
       propsToRemove.forEach(prop => {
         delete newContent[prop];
       });
-      onContentChanged({ ...newContent });
     }
 
-  }, []);
+    if (csvData.length > 1) {
+      // const newCsvData = cloneDeep(csvData);
+      let i = 1;
 
-  console.log(csvData);
+      while (i < newCsvData.length) {
+        if (newCsvData[i].every(elem => elem === '')) {
+          newCsvData.splice(i, 1);
+          newContent.csvData = newCsvData;
+        } else {
+          i += 1;
+        }
+      }
+    }
+
+    const csvDataLabels = newCsvData.shift();
+    newCsvData.sort((a, b) => a[0].localeCompare(b[0]));
+    newCsvData.splice(0, 0, csvDataLabels);
+
+    newContent.csvData = newCsvData;
+
+    onContentChanged({ ...newContent });
+
+  }, []);
 
   return (
     <div>
@@ -715,6 +623,9 @@ export default function ListEditor({ content, onContentChanged }) {
           <Input value={listName} onChange={handleListNameChanged} />
         </FormItem>
         {csvData.length < 2 && csvData[0].length === 0 && renderDragger()}
+        <FormItem label={t('csvExport')} {...FORM_ITEM_LAYOUT}>
+          <Button icon={<DownloadOutlined />} onClick={downloadCSV}>Download CSV</Button>
+        </FormItem>
         <FormItem label={t('searchFunctionality')} {...FORM_ITEM_LAYOUT}>
           <Switch
             size="small"
@@ -739,12 +650,6 @@ export default function ListEditor({ content, onContentChanged }) {
           </FormItem>
           : null}
 
-        {csvData[0][0] && !hasCsvData ? <Divider plain>{t('display')}</Divider> : null}
-        <DragAndDropContainer
-          droppableId={droppableIdRef.current}
-          items={dragAndDropLabels}
-          onItemMove={handleMoveLabel}
-        />
         {!hasListBeenCreated && !hasCsvData
           ? (
             <FormItem {...FORM_ITEM_LAYOUT}>
@@ -752,8 +657,7 @@ export default function ListEditor({ content, onContentChanged }) {
                 icon={<PlusOutlined />}
                 type='primary'
                 onClick={() => {
-                  // setHasListBeenCreated(true);
-                  updateContent({ customLabels: [t('newProperty'), t('newProperty')], csvData: [[t('newProperty'), t('newProperty')]], hasCsvData: true });
+                  updateContent({ csvData: [[t('newProperty'), t('newProperty')]] });
                 }}
               >
                 {t('createNewList')}

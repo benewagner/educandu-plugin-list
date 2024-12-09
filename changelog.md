@@ -1,15 +1,24 @@
+2.0.0
+
+Implement new functionality:
+
+- Add items to list
+- Edit list items
+- Add audio tracks to list items
+- Rename csv headers for cc0 music
+
 1.1.1
 
-- update dist folder
+Update dist folder
 
-  1.1.0
+1.1.0
 
-- Update dependencies and node version
+Update dependencies and node version
 
-  1.0.2
+1.0.2
 
-- Update readme
+Update readme
 
-  1.0.1
+1.0.1
 
-- Update dependencies. Fix dist folder
+Update dependencies. Fix dist folder

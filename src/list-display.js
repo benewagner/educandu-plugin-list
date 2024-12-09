@@ -13,8 +13,6 @@ export default function ListDisplay({ content }) {
   const inputRef = useRef(null);
   const { t } = useTranslation('benewagner/educandu-plugin-list');
   const archivedByBSB = t('archivedByBSB');
-  // const { csvData, customLabels, isCC0Music, listName, renderSearch } = content;
-  // const { csvData, isCC0Music, listName, renderSearch } = content;
   const { csvData, listName, renderSearch } = content;
   const isCC0Music = csvData[0].includes('bsb-url-1');
   const customLabels = csvData?.[0];
@@ -30,6 +28,7 @@ export default function ListDisplay({ content }) {
   const getInitialCsvDisplayData = () => {
     const data = cloneDeep(csvData);
     data.shift();
+    data.sort((a, b) => a[0].localeCompare(b[0]));
     return data;
   };
 

@@ -48,8 +48,8 @@ benewagner/educandu-plugin-list:
     en: New Item
     de: Neuer Datensatz
   save:
-    en: Save Item
-    de: Datensatz speichern
+    en: Add Item
+    de: Datensatz hinzufügen
   createNewList:
     en: Create new list manually
     de: Neue Liste manuell anlegen
@@ -89,3 +89,6 @@ benewagner/educandu-plugin-list:
   newUrl:
     en: New URL
     de: Neue URL
+  noItemsYet:
+    en: No items yet
+    de: Noch keine Datensätze

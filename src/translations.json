@@ -65,8 +65,8 @@
       "de": "Neuer Datensatz"
     },
     "save": {
-      "en": "Save Item",
-      "de": "Datensatz speichern"
+      "en": "Add Item",
+      "de": "Datensatz hinzufügen"
     },
     "createNewList": {
       "en": "Create new list manually",
@@ -119,6 +119,10 @@
     "newUrl": {
       "en": "New URL",
       "de": "Neue URL"
+    },
+    "noItemsYet": {
+      "en": "No items yet",
+      "de": "Noch keine Datensätze"
     }
   }
 }

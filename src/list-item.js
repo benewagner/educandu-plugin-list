@@ -80,6 +80,7 @@ export default ListItem;
 
 ListItem.propTypes = {
   archivedByBSB: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
   itemArray: PropTypes.array.isRequired,
   isCC0Music: PropTypes.bool.isRequired,
   customLabels: PropTypes.array.isRequired,
