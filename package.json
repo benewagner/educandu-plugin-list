@@ -1,6 +1,6 @@
 {
   "name": "@benewagner/educandu-plugin-list",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A csv list plugin for educandu",
   "type": "module",
   "exports": {
