@@ -1,3 +1,7 @@
+2.0.1
+
+Update dist folder
+
 2.0.0
 
 Implement new functionality:
