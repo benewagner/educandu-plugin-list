@@ -1,7 +1,8 @@
 import Papa from 'papaparse';
 import jschardet from 'jschardet';
-import { useTranslation } from 'react-i18next';
 import CSVLabel from './csv-label.js';
+import { useTranslation } from 'react-i18next';
+import MarkdownInput from './list-markdown-input.js';
 import Logger from '@educandu/educandu/common/logger.js';
 import uniqueId from '@educandu/educandu/utils/unique-id.js';
 import cloneDeep from '@educandu/educandu/utils/clone-deep.js';
@@ -281,7 +282,7 @@ export default function ListEditor({ content, onContentChanged }) {
       {isNewEntryEditActive
         ? customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map((label, index) => (
           <FormItem key={`${customListLabelKeys.current[index]}-newItem`} {...FORM_ITEM_LAYOUT} label={label}>
-            <Input onChange={e => { newItemData.current[index] = e.target.value; }} />
+            <MarkdownInput minRows={1} onChange={e => { newItemData.current[index] = e.target.value; }} />
           </FormItem>
         ))
         : null}
@@ -518,7 +519,9 @@ export default function ListEditor({ content, onContentChanged }) {
 
         return (
           <React.Fragment key={customListLabelKeys.current[index]}>
-            <FormItem label={newLabel} {...FORM_ITEM_LAYOUT}><Input value={csvData[itemToEditIndex][index]} onChange={e => handleItemWasEdited(e, index)} />
+            <FormItem label={newLabel} {...FORM_ITEM_LAYOUT}>
+              {/* <Input value={csvData[itemToEditIndex][index]} onChange={e => handleItemWasEdited(e, index)} /> */}
+              <MarkdownInput minRows={1} value={csvData[itemToEditIndex][index]} onChange={e => handleItemWasEdited(e, index)} />
             </FormItem>
           </React.Fragment>
         );

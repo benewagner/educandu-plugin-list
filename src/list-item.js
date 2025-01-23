@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import ClientConfig from '@educandu/educandu/bootstrap/client-config.js';
 import { getAccessibleUrl } from '@educandu/educandu/utils/source-utils.js';
+import Markdown from '@educandu/educandu/components/markdown.js';
 import { useService } from '@educandu/educandu/components/container-context.js';
 
 function ListItem({ itemArray, isCC0Music, customLabels, firstTrackDataIndex, archivedByBSB, index }) {
@@ -61,7 +62,11 @@ function ListItem({ itemArray, isCC0Music, customLabels, firstTrackDataIndex, ar
   const renderInfos = () => (
     <div className="List-listItemInfos">
       <ul style={{ listStyle: 'none' }}>
-        {customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map((label, i) => i > 0 && itemArray[i] !== '' ? <li key={`${label}-${i}`}><span style={{ fontWeight: 'bold' }}>{`${label}: `}</span>{itemArray[i]}</li> : null)}
+        {customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map((label, i) => i > 0 && itemArray[i] !== ''
+          // ? <li key={`${label}-${i}`}><span style={{ fontWeight: 'bold' }}>{`${label}: `}</span>{itemArray[i]}</li>
+          // : null)}
+          ? <li key={`${label}-${i}`}><span style={{ fontWeight: 'bold' }}>{`${label}: `}</span><Markdown inline>{itemArray[i]}</Markdown></li>
+          : null)}
       </ul>
       {renderTracks()}
     </div>
