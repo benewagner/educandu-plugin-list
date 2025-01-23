@@ -1,3 +1,7 @@
+2.1.0
+
+Support markdown that is inline-compatible
+
 2.0.1
 
 Update dist folder
