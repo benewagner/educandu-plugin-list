@@ -24,20 +24,21 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const droppableIdRef = useRef(useId());
   const { t } = useTranslation('benewagner/educandu-plugin-list');
-  const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
+  // const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
   const { listName, csvData, renderSearch } = content;
   const isCC0Music = csvData[0].includes('bsb-url-1');
 
   const hasCsvData = csvData.length >= 1 && csvData[0].length > 0;
 
   const firstTrackDataIndex = csvData[0].findIndex(elem => elem.includes('track-title-'));
+  console.log(firstTrackDataIndex);
 
   const customLabels = csvData?.[0];
 
-  const audioCount = customLabels.filter(label => label.includes('track-title-')).length;
+  // const audioCount = customLabels.filter(label => label.includes('track-title-')).length;
   const itemToEditAudioCount = useRef(0);
 
-  const [triggerRender, setTriggerRender] = useState(false);
+  // const [triggerRender, setTriggerRender] = useState(false);
 
   const [itemToEditIndex, setItemToEditIndex] = useState(1);
 
@@ -46,10 +47,10 @@ export default function ListEditor({ content, onContentChanged }) {
   const FormItem = Form.Item;
   const encodingRef = useRef(null);
 
-  const newItemData = useRef(customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map(() => ''));
+  // const newItemData = useRef(customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map(() => ''));
 
   const getAudioTemplate = () => isCC0Music ? ['', '', '',] : ['', ''];
-  const audioTemplate = getAudioTemplate();
+  // const audioTemplate = getAudioTemplate();
 
   const customListLabelKeys = useRef([]);
   if (hasCsvData) {
@@ -271,9 +272,9 @@ export default function ListEditor({ content, onContentChanged }) {
 
       {renderCustomListLabels()}
 
-      <Divider plain>{t('newItem')}</Divider>
+      {/* <Divider plain>{t('newItem')}</Divider> */}
 
-      {!isNewEntryEditActive
+      {/* {!isNewEntryEditActive
         ? <FormItem {...FORM_ITEM_LAYOUT}>
           <Button icon={<PlusOutlined />} type='primary' onClick={() => setIsNewEntryEditActive(true)} />
         </FormItem>
@@ -285,7 +286,7 @@ export default function ListEditor({ content, onContentChanged }) {
             <MarkdownInput minRows={1} onChange={e => { newItemData.current[index] = e.target.value; }} />
           </FormItem>
         ))
-        : null}
+        : null} */}
 
       {hasListBeenCreated
         ? newAudios.current.map((arr, index) => !isCC0Music
@@ -329,7 +330,7 @@ export default function ListEditor({ content, onContentChanged }) {
             </FormItem>
           </div>)
         : null}
-      {hasListBeenCreated && isNewEntryEditActive
+      {/* {hasListBeenCreated && isNewEntryEditActive
         ? <React.Fragment>
           <Button
             icon={<PlusOutlined />}
@@ -416,7 +417,7 @@ export default function ListEditor({ content, onContentChanged }) {
             </Button>
           </div>
         </React.Fragment>
-        : null}
+        : null} */}
     </React.Fragment>
   );
 
@@ -451,6 +452,14 @@ export default function ListEditor({ content, onContentChanged }) {
     updateContent({ csvData: newCsvData });
   };
 
+  const handleAddItem = () => {
+    const newContent = cloneDeep(content);
+    const newItem = customLabels.map((label, index) => index === 0 ? 'Neuer Datensatz' : '');
+    newContent.csvData.push(newItem);
+    updateContent(newContent);
+    setItemToEditIndex(newContent.csvData.length - 1);
+  };
+
   const renderItemEditor = () => (
     <React.Fragment>
       {csvData.length > 1
@@ -459,6 +468,11 @@ export default function ListEditor({ content, onContentChanged }) {
         </FormItem>
         : null}
       <Divider plain>{csvData.length > 1 ? t('editItem') : t('noItemsYet')}</Divider>
+
+      <FormItem {...FORM_ITEM_LAYOUT}>
+        <Button icon={<PlusOutlined />} type='primary' onClick={handleAddItem} />
+      </FormItem>
+
       {csvData.length > 1 && csvData[0].map((label, index) => {
         if (index > csvData[itemToEditIndex].length - 1) {
           return null;
@@ -532,7 +546,10 @@ export default function ListEditor({ content, onContentChanged }) {
         style={{ marginLeft: '32px', marginTop: '16px' }}
         onClick={() => {
           const newCsvData = cloneDeep(csvData);
-          const validFirstTrackDataIndex = firstTrackDataIndex || newCsvData[0].length;
+          let validFirstTrackDataIndex = firstTrackDataIndex;
+          if (validFirstTrackDataIndex === -1) {
+            validFirstTrackDataIndex = newCsvData[0].length;
+          }
           const numberOfTrackProperties = isCC0Music ? 3 : 2;
           newCsvData[itemToEditIndex][validFirstTrackDataIndex + (itemToEditAudioCount.current * numberOfTrackProperties)] = t('newTitle');
           newCsvData[itemToEditIndex][validFirstTrackDataIndex + (itemToEditAudioCount.current * numberOfTrackProperties) + 1] = t('newUrl');
@@ -644,7 +661,7 @@ export default function ListEditor({ content, onContentChanged }) {
               <RadioButton
                 value='edit-items'
                 onChange={() => {
-                  setIsNewEntryEditActive(false);
+                  // setIsNewEntryEditActive(false);
                   setEditorType('edit-items');
                 }}
               >{t('items')}
