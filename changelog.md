@@ -1,3 +1,7 @@
+2.1.1
+
+Move add item logix to item editor. Fix validFirstTrackDataIndex.
+
 2.1.0
 
 Support markdown that is inline-compatible
@@ -15,7 +19,7 @@ Implement new functionality:
 - Add audio tracks to list items
 - Rename csv headers for cc0 music
 
-1.1.1
+  1.1.1
 
 Update dist folder
 
