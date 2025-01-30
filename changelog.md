@@ -1,3 +1,7 @@
+2.1.2
+
+Update dist folder
+
 2.1.1
 
 Move add item logix to item editor. Fix validFirstTrackDataIndex.
