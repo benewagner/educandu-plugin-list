@@ -10,7 +10,7 @@ import UrlInput from '@educandu/educandu/components/url-input.js';
 import React, { useRef, useId, useEffect, useState } from 'react';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
-import { CloudUploadOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined, DeleteOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form, Upload, Button, Radio, Input, Divider, Switch, InputNumber } from 'antd';
 import DragAndDropContainer from '@educandu/educandu/components/drag-and-drop-container.js';
 import { swapItemsAt, removeItemAt, moveItem } from '@educandu/educandu/utils/array-utils.js';
@@ -35,10 +35,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const customLabels = csvData?.[0];
 
-  // const audioCount = customLabels.filter(label => label.includes('track-title-')).length;
   const itemToEditAudioCount = useRef(0);
-
-  // const [triggerRender, setTriggerRender] = useState(false);
 
   const [itemToEditIndex, setItemToEditIndex] = useState(1);
 
@@ -46,11 +43,6 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const FormItem = Form.Item;
   const encodingRef = useRef(null);
-
-  // const newItemData = useRef(customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map(() => ''));
-
-  const getAudioTemplate = () => isCC0Music ? ['', '', '',] : ['', ''];
-  // const audioTemplate = getAudioTemplate();
 
   const customListLabelKeys = useRef([]);
   if (hasCsvData) {
@@ -460,6 +452,13 @@ export default function ListEditor({ content, onContentChanged }) {
     setItemToEditIndex(newContent.csvData.length - 1);
   };
 
+  const handleDeleteItem = () => {
+    const newContent = cloneDeep(content);
+    newContent.csvData.splice(itemToEditIndex, 1);
+    setItemToEditIndex(1);
+    updateContent(newContent);
+  };
+
   const renderItemEditor = () => (
     <React.Fragment>
       {csvData.length > 1
@@ -471,6 +470,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
       <FormItem {...FORM_ITEM_LAYOUT}>
         <Button icon={<PlusOutlined />} type='primary' onClick={handleAddItem} />
+        <Button icon={<DeleteOutlined />} type='primary' style={{ marginLeft: '0.5rem' }} onClick={handleDeleteItem} />
       </FormItem>
 
       {csvData.length > 1 && csvData[0].map((label, index) => {

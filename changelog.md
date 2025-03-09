@@ -1,3 +1,7 @@
+2.1.3
+
+Add delete button to item editor
+
 2.1.2
 
 Update dist folder
