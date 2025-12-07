@@ -1,0 +1,94 @@
+benewagner/educandu-plugin-list:
+  name:
+    en: List
+    de: Liste
+  listName:
+    en: Name
+    de: Name
+  csvImport:
+    en: CSV import
+    de: CSV-Import
+  csvExport:
+    en: CSV export
+    de: CSV-Export
+  dragAndDropOrClick:
+    en: Drag and drop a CSV file here to upload it or click on this area to select a file from your machine.
+    de: Ziehe eine CSV-Datei hierher, um sie hochzuladen, oder klicke auf die Fläche, um eine Datei von deinem Computer auszuwählen.
+  display:
+    en: Display
+    de: Anzeige
+  new:
+    en: new
+    de: neu
+  delete:
+    en: Delete
+    de: Löschen
+  foldOutContent:
+    en: Fold-out content
+    de: Ausklappbarer Inhalt
+  updateCC0Music:
+    en: Update CC0 music
+    de: Update CC0-Musik
+  archivedByBSB:
+    en: Archived by Bayerische Staatsbibliothek
+    de: Archiviert durch die Bayerische Staatsbibliothek
+  searchWithin:
+    en: Search within
+    de: Suchen in
+  list:
+    en: list
+    de: Liste
+  searchFunctionality:
+    en: Search functionality
+    de: Suchfunktion
+  uploadCsvFile:
+    en: Upload CSV File
+    de: CSV-Datei hochladen
+  newItem:
+    en: New Item
+    de: Neuer Datensatz
+  save:
+    en: Add Item
+    de: Datensatz hinzufügen
+  createNewList:
+    en: Create new list manually
+    de: Neue Liste manuell anlegen
+  customList:
+    en: Custom list
+    de: Eigene Liste
+  newProperty:
+    en: New property
+    de: Neue Eigenschaft
+  property:
+    en: Property
+    de: Eigenschaft
+  trackTitle:
+    en: Track title
+    de: Track-Titel
+  trackUrl:
+    en: Track URL
+    de: Track-URL
+  bsbUrl:
+    en: BSB URL
+    de: BSB-URL
+  edit:
+    en: Edit
+    de: Bearbeiten
+  item:
+    en: Item
+    de: Datensatz
+  items:
+    en: Items
+    de: Datensätze
+  editItem:
+    en: Edit item
+    de: Datensatz bearbeiten
+  newTitle:
+    en: New title
+    de: Neuer Titel
+  newUrl:
+    en: New URL
+    de: Neue URL
+  noItemsYet:
+    en: No items yet
+    de: Noch keine Datensätze
