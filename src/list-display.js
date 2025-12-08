@@ -36,6 +36,8 @@ export default function ListDisplay({ content }) {
   const firstTrackDataIndex = csvData[0].findIndex(elem => elem.includes('track-title-'));
   const unfilteredCsvDataRef = useRef(getInitialCsvDisplayData());
 
+  console.log(content.csvData)
+
   const [selectedTags, setSelectedTags] = useState(() => {
     const arr = cloneDeep(tagsData);
     if (tagsData.find(tag => tag.includes('track-title-'))) {

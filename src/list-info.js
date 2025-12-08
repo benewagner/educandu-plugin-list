@@ -72,7 +72,20 @@ class ListInfo {
   }
 
   getCdnResources(content) {
-    return this.gfm.extractCdnResources(content.text);
+    const headers = content.csvData[0];
+    console.log(content.csvData[1])
+    const items = cloneDeep(content.csvData.slice(1));
+    const cdnUrlIndices = headers.map((header, index) => header.startsWith('track-url-') ? index : false).filter(item => item);
+    const cdnResources = [];
+    for (const item of items) {
+      for (const index of cdnUrlIndices) {
+        if (item[index]){
+          item[index] = `![](${item[index]})`;
+          cdnResources.push(item[index]);
+        }
+      }
+    }
+    return this.gfm.extractCdnResources(cdnResources.join(' '));
   }
 }
 

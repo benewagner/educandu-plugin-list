@@ -10,10 +10,10 @@ import UrlInput from '@educandu/educandu/components/url-input.js';
 import React, { useRef, useId, useEffect, useState } from 'react';
 import { FORM_ITEM_LAYOUT } from '@educandu/educandu/domain/constants.js';
 import { sectionEditorProps } from '@educandu/educandu/ui/default-prop-types.js';
-import { CloudUploadOutlined, DeleteOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form, Upload, Button, Radio, Input, Divider, Switch, InputNumber } from 'antd';
 import DragAndDropContainer from '@educandu/educandu/components/drag-and-drop-container.js';
 import { swapItemsAt, removeItemAt, moveItem } from '@educandu/educandu/utils/array-utils.js';
+import { CloudUploadOutlined, DeleteOutlined, DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Dragger } = Upload;
 const logger = new Logger(import.meta.url);
@@ -24,14 +24,12 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const droppableIdRef = useRef(useId());
   const { t } = useTranslation('benewagner/educandu-plugin-list');
-  // const [isNewEntryEditActive, setIsNewEntryEditActive] = useState(false);
   const { listName, csvData, renderSearch } = content;
   const isCC0Music = csvData[0].includes('bsb-url-1');
 
   const hasCsvData = csvData.length >= 1 && csvData[0].length > 0;
 
   const firstTrackDataIndex = csvData[0].findIndex(elem => elem.includes('track-title-'));
-  console.log(firstTrackDataIndex);
 
   const customLabels = csvData?.[0];
 
@@ -59,9 +57,101 @@ export default function ListEditor({ content, onContentChanged }) {
     audioKeys.current.push(uniqueId.create());
   }
 
+  function cleanTrackPairsPerRow(csvData, isCC0Music) {
+    const [headerRow, ...dataRows] = csvData;
+
+    const firstTrackIndex = headerRow.findIndex(h => h.startsWith('track-title-'));
+    if (firstTrackIndex === -1) {
+      return csvData;
+    }
+
+    const step = isCC0Music ? 3 : 2;
+
+    const cleanedRows = dataRows.map(row => {
+      const fixed = row.slice(0, firstTrackIndex);
+      const cleanedTrackData = [];
+
+      for (let i = firstTrackIndex; i < row.length; i += step) {
+        const title = row[i];
+        const url = isCC0Music ? row[i + 2] : row[i + 1];
+        const bsb = isCC0Music ? row[i + 1] : undefined;
+
+        const hasAny =
+          (title && title !== '') ||
+          (url && url !== '') ||
+          (isCC0Music && bsb && bsb !== '');
+
+        if (!hasAny) {
+          continue;
+        }
+
+        cleanedTrackData.push(title);
+        if (isCC0Music) {
+          cleanedTrackData.push(bsb);
+        }
+        cleanedTrackData.push(url);
+      }
+
+      return [...fixed, ...cleanedTrackData];
+    });
+
+    return [headerRow, ...cleanedRows];
+  }
+
+  function trimTrackHeadersToMaxUsage(csvData, isCC0Music) {
+    const [headerRow, ...dataRows] = csvData;
+
+    const firstTrackIndex = headerRow.findIndex(h => h.startsWith('track-title-'));
+    if (firstTrackIndex === -1) {
+      // Es gibt gar keine Tracks
+      return csvData;
+    }
+
+    const blockSize = isCC0Music ? 3 : 2;
+
+    // Wie viele Track-Blöcke benutzt jede Zeile maximal?
+    let maxTracks = 0;
+
+    for (const row of dataRows) {
+      let trackCountForRow = 0;
+
+      for (let i = firstTrackIndex; i < row.length; i += blockSize) {
+        const title = row[i];
+        const url = isCC0Music ? row[i + 2] : row[i + 1];
+        const bsb = isCC0Music ? row[i + 1] : undefined;
+
+        const hasAny =
+          (title && title !== '') ||
+          (url && url !== '') ||
+          (isCC0Music && bsb && bsb !== '');
+
+        if (hasAny) {
+          trackCountForRow += 1;
+        }
+      }
+
+      if (trackCountForRow > maxTracks) {
+        maxTracks = trackCountForRow;
+      }
+    }
+
+    // Wenn niemand mehr Tracks hat, alle Track-Header weg
+    const neededColumns = firstTrackIndex + maxTracks * blockSize;
+
+    const trimmedHeader = headerRow.slice(0, neededColumns);
+    const trimmedRows = dataRows.map(row => row.slice(0, neededColumns));
+
+    return [trimmedHeader, ...trimmedRows];
+  }
+
   const updateContent = newContentValues => {
-    onContentChanged({ ...content, ...newContentValues });
+    const newContent = { ...content, ...newContentValues };
+    let cleaned = cleanTrackPairsPerRow(cloneDeep(newContent.csvData)); // pro Zeile leere Tracks entfernen/zusammenschieben
+    cleaned = trimTrackHeadersToMaxUsage(cleaned, isCC0Music);          // unbenutzte Track-Header entfernen
+
+    onContentChanged({ ...newContent, csvData: cleaned });
   };
+
 
   // customRequest also provides onError
   const customRequest = ({ file, onSuccess }) => {
@@ -133,6 +223,22 @@ export default function ListEditor({ content, onContentChanged }) {
       updateContent({ listName: filenameWithoutExtension });
     }
   };
+
+  function getNextTrackNumber(headerRow) {
+    const trackTitleHeaders = headerRow.filter(h => h.startsWith('track-title-'));
+
+    if (trackTitleHeaders.length === 0) {
+      // Noch keine Tracks vorhanden -> bei 1 anfangen
+      return 1;
+    }
+
+    const lastHeader = trackTitleHeaders[trackTitleHeaders.length - 1];
+    const match = lastHeader.match(/(\d+)$/);
+    const lastNumber = match ? Number(match[1]) : 0;
+
+    return lastNumber + 1;
+  }
+
 
   const handleListNameChanged = event => updateContent({ listName: event.target.value });
 
@@ -264,22 +370,6 @@ export default function ListEditor({ content, onContentChanged }) {
 
       {renderCustomListLabels()}
 
-      {/* <Divider plain>{t('newItem')}</Divider> */}
-
-      {/* {!isNewEntryEditActive
-        ? <FormItem {...FORM_ITEM_LAYOUT}>
-          <Button icon={<PlusOutlined />} type='primary' onClick={() => setIsNewEntryEditActive(true)} />
-        </FormItem>
-        : null}
-
-      {isNewEntryEditActive
-        ? customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map((label, index) => (
-          <FormItem key={`${customListLabelKeys.current[index]}-newItem`} {...FORM_ITEM_LAYOUT} label={label}>
-            <MarkdownInput minRows={1} onChange={e => { newItemData.current[index] = e.target.value; }} />
-          </FormItem>
-        ))
-        : null} */}
-
       {hasListBeenCreated
         ? newAudios.current.map((arr, index) => !isCC0Music
           ? (
@@ -322,102 +412,16 @@ export default function ListEditor({ content, onContentChanged }) {
             </FormItem>
           </div>)
         : null}
-      {/* {hasListBeenCreated && isNewEntryEditActive
-        ? <React.Fragment>
-          <Button
-            icon={<PlusOutlined />}
-            type="primary"
-            style={{ marginLeft: '32px', marginTop: '16px' }}
-            onClick={() => {
-              newAudios.current.push(audioTemplate);
-              setTriggerRender(prev => !prev);
-            }}
-          >
-            Audio
-          </Button>
-          <div style={{ display: 'flex', gap: '0.5rem', width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
-            <Button
-              type="default"
-              onClick={() => {
-                setIsNewEntryEditActive(false);
-                newAudios.current = [];
-                setAudioUrls(prev => {
-                  const newAudioUrls = cloneDeep(prev);
-                  newAudioUrls.push('');
-                  return newAudioUrls;
-                });
-              }}
-            >
-              {t('common:cancel')}
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                setIsNewEntryEditActive(false);
-
-                for (const audio of newAudios.current) {
-
-                  let hasInfo = false;
-                  for (const dataString of audio) {
-                    if (dataString !== '') {
-                      hasInfo = true;
-                    }
-                  }
-
-                  if (hasInfo) {
-                    for (const dataString of audio) {
-                      newItemData.current.push(dataString);
-                    }
-                  }
-                }
-
-                if (newItemData.current.every(string => string === '')) {
-                  newAudios.current = [];
-                  setAudioUrls([]);
-                  setTriggerRender(prev => !prev);
-                  return;
-                }
-
-                const newCsvData = cloneDeep(csvData);
-                newCsvData.push(newItemData.current);
-
-                const csvDataLabels = newCsvData.shift();
-                newCsvData.sort((a, b) => a[0].localeCompare(b[0]));
-                newCsvData.splice(0, 0, csvDataLabels);
-
-                if (newAudios.current.length > audioCount) {
-
-                  const surplusAudiosCount = newAudios.current.length - audioCount;
-
-                  for (let i = audioCount; i < audioCount + surplusAudiosCount; i += 1) {
-                    newCsvData[0].push(`track-title-${i}`);
-                    if (isCC0Music) {
-                      newCsvData[0].push(`bsb-url-${i}`);
-                    }
-                    newCsvData[0].push(`track-url-${i}`);
-                  }
-                }
-
-                newAudios.current = [];
-                setAudioUrls([]);
-
-                updateContent({ csvData: newCsvData });
-                newItemData.current = customLabels.filter(label => !label.includes('track-title-') && !label.includes('track-url-') && !label.includes('bsb-url-')).map(() => '');
-              }}
-            >
-              {t('save')}
-            </Button>
-          </div>
-        </React.Fragment>
-        : null} */}
     </React.Fragment>
   );
 
   const handleItemWasEdited = (e, propertyIndex, isUrl = false) => {
     const newCsvData = cloneDeep(csvData);
     const newValue = isUrl ? e : e.target.value;
+
     newCsvData[itemToEditIndex][propertyIndex] = newValue;
 
+    // Wenn die ganze Zeile leer ist -> Datensatz löschen
     if (newCsvData[itemToEditIndex].every(str => str === '')) {
       newCsvData.splice(itemToEditIndex, 1);
       setItemToEditIndex(1);
@@ -425,24 +429,9 @@ export default function ListEditor({ content, onContentChanged }) {
       return;
     }
 
-    let i = firstTrackDataIndex;
-
-    while (i < newCsvData[itemToEditIndex].length) {
-      if (newCsvData[itemToEditIndex] === '' && newCsvData[itemToEditIndex + 1] === '') {
-        if (isCC0Music) {
-          if (newCsvData[itemToEditIndex + 2] === '') {
-            newCsvData[itemToEditIndex].splice(i, 3);
-          }
-        } else {
-          newCsvData[itemToEditIndex].splice(i, 2);
-        }
-      } else {
-        i += 1;
-      }
-    }
-
     updateContent({ csvData: newCsvData });
   };
+
 
   const handleAddItem = () => {
     const newContent = cloneDeep(content);
@@ -463,7 +452,17 @@ export default function ListEditor({ content, onContentChanged }) {
     <React.Fragment>
       {csvData.length > 1
         ? <FormItem label={t('item')} {...FORM_ITEM_LAYOUT}>
-          <InputNumber min={1} max={csvData.length - 1} value={itemToEditIndex} onChange={e => setItemToEditIndex(e)} />
+          <InputNumber
+            min={1}
+              max={csvData.length - 1}
+              value={itemToEditIndex}
+              onChange={value => {
+                if (value == null) {
+                  setItemToEditIndex(1);
+                  return;
+                }
+                setItemToEditIndex(value);
+              }} />
         </FormItem>
         : null}
       <Divider plain>{csvData.length > 1 ? t('editItem') : t('noItemsYet')}</Divider>
@@ -560,13 +559,8 @@ export default function ListEditor({ content, onContentChanged }) {
           itemToEditAudioCount.current += 1;
 
           if (newCsvData[itemToEditIndex].length > newCsvData[0].length) {
-            let lastTrackNumber;
-            if (!newCsvData[0].includes('track-title-0')) {
-              lastTrackNumber = 0;
-            } else {
-              lastTrackNumber = Number(newCsvData[0][newCsvData[0].length - 1].match(/(\d{1,3})$/)[1]);
-            }
-            const newTrackNumber = lastTrackNumber + 1;
+            const newTrackNumber = getNextTrackNumber(newCsvData[0]);
+
             newCsvData[0].push(`track-title-${newTrackNumber}`);
             if (isCC0Music) {
               newCsvData[0].push(`bsb-url-${newTrackNumber}`);
@@ -613,7 +607,6 @@ export default function ListEditor({ content, onContentChanged }) {
     }
 
     if (csvData.length > 1) {
-      // const newCsvData = cloneDeep(csvData);
       let i = 1;
 
       while (i < newCsvData.length) {
@@ -661,7 +654,6 @@ export default function ListEditor({ content, onContentChanged }) {
               <RadioButton
                 value='edit-items'
                 onChange={() => {
-                  // setIsNewEntryEditActive(false);
                   setEditorType('edit-items');
                 }}
               >{t('items')}
