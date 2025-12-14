@@ -73,7 +73,6 @@ class ListInfo {
 
   getCdnResources(content) {
     const headers = content.csvData[0];
-    console.log(content.csvData[1])
     const items = cloneDeep(content.csvData.slice(1));
     const cdnUrlIndices = headers.map((header, index) => header.startsWith('track-url-') ? index : false).filter(item => item);
     const cdnResources = [];

@@ -1,5 +1,9 @@
 2.1.3
 
+Track CDN Resources. Fix index number input deletion error.
+
+2.1.3
+
 Add delete button to item editor
 
 2.1.2

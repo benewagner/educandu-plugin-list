@@ -57,15 +57,15 @@ export default function ListEditor({ content, onContentChanged }) {
     audioKeys.current.push(uniqueId.create());
   }
 
-  function cleanTrackPairsPerRow(csvData, isCC0Music) {
-    const [headerRow, ...dataRows] = csvData;
+  function cleanTrackPairsPerRow(csvDataLocal, isCC0MusicLocal) {
+    const [headerRow, ...dataRows] = csvDataLocal;
 
     const firstTrackIndex = headerRow.findIndex(h => h.startsWith('track-title-'));
     if (firstTrackIndex === -1) {
-      return csvData;
+      return csvDataLocal;
     }
 
-    const step = isCC0Music ? 3 : 2;
+    const step = isCC0MusicLocal ? 3 : 2;
 
     const cleanedRows = dataRows.map(row => {
       const fixed = row.slice(0, firstTrackIndex);
@@ -73,20 +73,22 @@ export default function ListEditor({ content, onContentChanged }) {
 
       for (let i = firstTrackIndex; i < row.length; i += step) {
         const title = row[i];
-        const url = isCC0Music ? row[i + 2] : row[i + 1];
-        const bsb = isCC0Music ? row[i + 1] : undefined;
+        const url = isCC0MusicLocal ? row[i + 2] : row[i + 1];
+        // eslint-disable-next-line no-undefined
+        const bsb = isCC0MusicLocal ? row[i + 1] : undefined;
 
-        const hasAny =
-          (title && title !== '') ||
-          (url && url !== '') ||
-          (isCC0Music && bsb && bsb !== '');
+        const hasAny
+          = (title && title !== '')
+          || (url && url !== '')
+          || (isCC0MusicLocal && bsb && bsb !== '');
 
         if (!hasAny) {
+          // eslint-disable-next-line no-continue
           continue;
         }
 
         cleanedTrackData.push(title);
-        if (isCC0Music) {
+        if (isCC0MusicLocal) {
           cleanedTrackData.push(bsb);
         }
         cleanedTrackData.push(url);
@@ -98,16 +100,16 @@ export default function ListEditor({ content, onContentChanged }) {
     return [headerRow, ...cleanedRows];
   }
 
-  function trimTrackHeadersToMaxUsage(csvData, isCC0Music) {
-    const [headerRow, ...dataRows] = csvData;
+  function trimTrackHeadersToMaxUsage(csvDataLocal, isCC0MusicLocal) {
+    const [headerRow, ...dataRows] = csvDataLocal;
 
     const firstTrackIndex = headerRow.findIndex(h => h.startsWith('track-title-'));
     if (firstTrackIndex === -1) {
       // Es gibt gar keine Tracks
-      return csvData;
+      return csvDataLocal;
     }
 
-    const blockSize = isCC0Music ? 3 : 2;
+    const blockSize = isCC0MusicLocal ? 3 : 2;
 
     // Wie viele Track-Blöcke benutzt jede Zeile maximal?
     let maxTracks = 0;
@@ -117,13 +119,14 @@ export default function ListEditor({ content, onContentChanged }) {
 
       for (let i = firstTrackIndex; i < row.length; i += blockSize) {
         const title = row[i];
-        const url = isCC0Music ? row[i + 2] : row[i + 1];
-        const bsb = isCC0Music ? row[i + 1] : undefined;
+        const url = isCC0MusicLocal ? row[i + 2] : row[i + 1];
+        // eslint-disable-next-line no-undefined
+        const bsb = isCC0MusicLocal ? row[i + 1] : undefined;
 
-        const hasAny =
-          (title && title !== '') ||
-          (url && url !== '') ||
-          (isCC0Music && bsb && bsb !== '');
+        const hasAny
+          = (title && title !== '')
+          || (url && url !== '')
+          || (isCC0MusicLocal && bsb && bsb !== '');
 
         if (hasAny) {
           trackCountForRow += 1;
@@ -151,7 +154,6 @@ export default function ListEditor({ content, onContentChanged }) {
 
     onContentChanged({ ...newContent, csvData: cleaned });
   };
-
 
   // customRequest also provides onError
   const customRequest = ({ file, onSuccess }) => {
@@ -239,7 +241,6 @@ export default function ListEditor({ content, onContentChanged }) {
     return lastNumber + 1;
   }
 
-
   const handleListNameChanged = event => updateContent({ listName: event.target.value });
 
   const handleCustomLabelChanged = (event, index) => {
@@ -307,13 +308,13 @@ export default function ListEditor({ content, onContentChanged }) {
           onMoveDown={handleMoveLabelDown}
           onDelete={handleDeleteLabel}
           itemsCount={customLabels.length}
-        >
+          >
           <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '900px', padding: '0.5rem 0' }}>
             <div style={{ margin: '0 1rem 0 2rem', width: '100%', maxWidth: '154px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label !== '' ? `${label}:` : `[${t('new')}]:`}</div>
             <Input
               value={customLabels[index]}
               onChange={e => handleCustomLabelChanged(e, index)}
-            />
+              />
           </div>
         </CSVLabel>
         {index === 0 ? <Divider plain>{t('foldOutContent')}</Divider> : null}
@@ -339,7 +340,7 @@ export default function ListEditor({ content, onContentChanged }) {
         droppableId={droppableIdRef.current}
         items={dragAndDropCustomListLabels}
         onItemMove={handleMoveLabel}
-      />
+        />
       <FormItem {...FORM_ITEM_LAYOUT}>
         <Button
           icon={<PlusOutlined />}
@@ -358,7 +359,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
             updateContent({ csvData: newCsvData });
           }}
-        >
+          >
           {t('property')}
         </Button>
       </FormItem>
@@ -371,47 +372,79 @@ export default function ListEditor({ content, onContentChanged }) {
       {renderCustomListLabels()}
 
       {hasListBeenCreated
-        ? newAudios.current.map((arr, index) => !isCC0Music
-          ? (
-            <div key={audioKeys.current[index]}>
-              <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}><Input onChange={e => { newAudios.current[index][0] = e.target.value; }} /></FormItem>
+        ? newAudios.current.map((arr, index) => {
+          const key = audioKeys.current[index];
+
+          if (!isCC0Music) {
+            return (
+              <div key={key}>
+                <FormItem
+                  {...FORM_ITEM_LAYOUT}
+                  label={`${t('common:title')} ${index + 1}`}
+                  >
+                  <Input
+                    onChange={e => {
+                      newAudios.current[index][0] = e.target.value;
+                    }}
+                    />
+                </FormItem>
+
+                <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}>
+                  <UrlInput
+                    value={audioUrls[index]}
+                    onChange={value => {
+                      newAudios.current[index][1] = value;
+                      setAudioUrls(prev => {
+                        const next = cloneDeep(prev);
+                        next[index] = value;
+                        return next;
+                      });
+                    }}
+                    />
+                </FormItem>
+              </div>
+            );
+          }
+
+          return (
+            <div key={`${key}-CC0`}>
+              <FormItem
+                {...FORM_ITEM_LAYOUT}
+                label={`${t('common:title')} ${index + 1}`}
+                >
+                <Input
+                  onChange={e => {
+                    newAudios.current[index][0] = e.target.value;
+                  }}
+                  />
+              </FormItem>
+
               <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}>
                 <UrlInput
                   value={audioUrls[index]}
-                  onChange={e => {
-                    newAudios.current[index][1] = e;
+                  onChange={value => {
+                    newAudios.current[index][2] = value;
                     setAudioUrls(prev => {
-                      const newAudioUrls = cloneDeep(prev);
-                      newAudioUrls[index] = e;
-                      return newAudioUrls;
+                      const next = cloneDeep(prev);
+                      next[index] = value;
+                      return next;
                     });
                   }}
-                />
+                  />
+              </FormItem>
+
+              <FormItem {...FORM_ITEM_LAYOUT} label={`BSB-URL ${index + 1}`}>
+                <Input
+                  onChange={e => {
+                    newAudios.current[index][1] = e.target.value;
+                  }}
+                  />
               </FormItem>
             </div>
-          )
-          : <div key={`${audioKeys.current[index]}-CC0`}>
-            <FormItem {...FORM_ITEM_LAYOUT} label={`${t('common:title')} ${index + 1}`}>
-              <Input onChange={e => { newAudios.current[index][0] = e.target.value; }} />
-            </FormItem>
-            <FormItem {...FORM_ITEM_LAYOUT} label={`URL ${index + 1}`}>
-              <UrlInput
-                value={audioUrls[index]}
-                onChange={e => {
-                  newAudios.current[index][2] = e;
-                  setAudioUrls(prev => {
-                    const newAudioUrls = cloneDeep(prev);
-                    newAudioUrls[index] = e;
-                    return newAudioUrls;
-                  });
-                }}
-              />
-            </FormItem>
-            <FormItem {...FORM_ITEM_LAYOUT} label={`BSB-URL ${index + 1}`}>
-              <Input onChange={e => { newAudios.current[index][1] = e.target.value; }} />
-            </FormItem>
-          </div>)
+          );
+        })
         : null}
+
     </React.Fragment>
   );
 
@@ -432,7 +465,6 @@ export default function ListEditor({ content, onContentChanged }) {
     updateContent({ csvData: newCsvData });
   };
 
-
   const handleAddItem = () => {
     const newContent = cloneDeep(content);
     const newItem = customLabels.map((label, index) => index === 0 ? 'Neuer Datensatz' : '');
@@ -451,20 +483,24 @@ export default function ListEditor({ content, onContentChanged }) {
   const renderItemEditor = () => (
     <React.Fragment>
       {csvData.length > 1
-        ? <FormItem label={t('item')} {...FORM_ITEM_LAYOUT}>
-          <InputNumber
-            min={1}
+        ? (
+          <FormItem label={t('item')} {...FORM_ITEM_LAYOUT}>
+            <InputNumber
+              min={1}
               max={csvData.length - 1}
               value={itemToEditIndex}
               onChange={value => {
-                if (value == null) {
+                if (value === null) {
                   setItemToEditIndex(1);
                   return;
                 }
                 setItemToEditIndex(value);
-              }} />
-        </FormItem>
+              }}
+              />
+          </FormItem>
+        )
         : null}
+
       <Divider plain>{csvData.length > 1 ? t('editItem') : t('noItemsYet')}</Divider>
 
       <FormItem {...FORM_ITEM_LAYOUT}>
@@ -539,39 +575,61 @@ export default function ListEditor({ content, onContentChanged }) {
           </React.Fragment>
         );
       })}
-      {csvData.length > 1 && <Button
-        icon={<PlusOutlined />}
-        type="primary"
-        style={{ marginLeft: '32px', marginTop: '16px' }}
-        onClick={() => {
-          const newCsvData = cloneDeep(csvData);
-          let validFirstTrackDataIndex = firstTrackDataIndex;
-          if (validFirstTrackDataIndex === -1) {
-            validFirstTrackDataIndex = newCsvData[0].length;
-          }
-          const numberOfTrackProperties = isCC0Music ? 3 : 2;
-          newCsvData[itemToEditIndex][validFirstTrackDataIndex + (itemToEditAudioCount.current * numberOfTrackProperties)] = t('newTitle');
-          newCsvData[itemToEditIndex][validFirstTrackDataIndex + (itemToEditAudioCount.current * numberOfTrackProperties) + 1] = t('newUrl');
-          if (isCC0Music) {
-            newCsvData[itemToEditIndex][validFirstTrackDataIndex + (itemToEditAudioCount.current * numberOfTrackProperties) + 2] = t('newUrl');
-          }
+      {csvData.length > 1
+        ? (
+          <Button
+            icon={<PlusOutlined />}
+            type="primary"
+            style={{ marginLeft: '32px', marginTop: '16px' }}
+            onClick={() => {
+              const newCsvData = cloneDeep(csvData);
+              let validFirstTrackDataIndex = firstTrackDataIndex;
 
-          itemToEditAudioCount.current += 1;
+              if (validFirstTrackDataIndex === -1) {
+                validFirstTrackDataIndex = newCsvData[0].length;
+              }
 
-          if (newCsvData[itemToEditIndex].length > newCsvData[0].length) {
-            const newTrackNumber = getNextTrackNumber(newCsvData[0]);
+              const numberOfTrackProperties = isCC0Music ? 3 : 2;
 
-            newCsvData[0].push(`track-title-${newTrackNumber}`);
-            if (isCC0Music) {
-              newCsvData[0].push(`bsb-url-${newTrackNumber}`);
-            }
-            newCsvData[0].push(`track-url-${newTrackNumber}`);
-          }
-          updateContent({ csvData: newCsvData });
-        }}
-      >
-        Audio
-      </Button>}
+              newCsvData[itemToEditIndex][
+                validFirstTrackDataIndex
+                + itemToEditAudioCount.current * numberOfTrackProperties
+              ] = t('newTitle');
+
+              newCsvData[itemToEditIndex][
+                validFirstTrackDataIndex
+                + itemToEditAudioCount.current * numberOfTrackProperties
+                + 1
+              ] = t('newUrl');
+
+              if (isCC0Music) {
+                newCsvData[itemToEditIndex][
+                  validFirstTrackDataIndex
+                  + itemToEditAudioCount.current * numberOfTrackProperties
+                  + 2
+                ] = t('newUrl');
+              }
+
+              itemToEditAudioCount.current += 1;
+
+              if (newCsvData[itemToEditIndex].length > newCsvData[0].length) {
+                const newTrackNumber = getNextTrackNumber(newCsvData[0]);
+
+                newCsvData[0].push(`track-title-${newTrackNumber}`);
+                if (isCC0Music) {
+                  newCsvData[0].push(`bsb-url-${newTrackNumber}`);
+                }
+                newCsvData[0].push(`track-url-${newTrackNumber}`);
+              }
+
+              updateContent({ csvData: newCsvData });
+            }}
+            >
+            Audio
+          </Button>
+        )
+        : null}
+
     </React.Fragment>
   );
 
@@ -627,6 +685,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
     onContentChanged({ ...newContent });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -644,22 +703,31 @@ export default function ListEditor({ content, onContentChanged }) {
             size="small"
             checked={renderSearch}
             onChange={e => updateContent({ renderSearch: e })}
-          />
+            />
         </FormItem>
 
         {hasCsvData
-          ? <FormItem label={t('edit')} {...FORM_ITEM_LAYOUT}>
-            <RadioGroup value={editorType}>
-              <RadioButton value='edit-list' onChange={() => setEditorType('edit-list')}>{t('list')}</RadioButton>
-              <RadioButton
-                value='edit-items'
-                onChange={() => {
-                  setEditorType('edit-items');
-                }}
-              >{t('items')}
-              </RadioButton>
-            </RadioGroup>
-          </FormItem>
+          ? (
+            <FormItem label={t('edit')} {...FORM_ITEM_LAYOUT}>
+              <RadioGroup value={editorType}>
+                <RadioButton
+                  value="edit-list"
+                  onChange={() => setEditorType('edit-list')}
+                  >
+                  {t('list')}
+                </RadioButton>
+
+                <RadioButton
+                  value="edit-items"
+                  onChange={() => {
+                    setEditorType('edit-items');
+                  }}
+                  >
+                  {t('items')}
+                </RadioButton>
+              </RadioGroup>
+            </FormItem>
+          )
           : null}
 
         {!hasListBeenCreated && !hasCsvData
@@ -671,7 +739,7 @@ export default function ListEditor({ content, onContentChanged }) {
                 onClick={() => {
                   updateContent({ csvData: [[t('newProperty'), t('newProperty')]] });
                 }}
-              >
+                >
                 {t('createNewList')}
               </Button>
             </FormItem>

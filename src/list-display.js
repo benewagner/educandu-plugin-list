@@ -36,8 +36,6 @@ export default function ListDisplay({ content }) {
   const firstTrackDataIndex = csvData[0].findIndex(elem => elem.includes('track-title-'));
   const unfilteredCsvDataRef = useRef(getInitialCsvDisplayData());
 
-  console.log(content.csvData)
-
   const [selectedTags, setSelectedTags] = useState(() => {
     const arr = cloneDeep(tagsData);
     if (tagsData.find(tag => tag.includes('track-title-'))) {
@@ -115,18 +113,18 @@ export default function ListDisplay({ content }) {
             key={tag + index}
             checked={selectedTags.includes(tag)}
             onChange={checked => handleChange(tag, checked)}
-          >
+            >
             {tag}
           </CheckableTag>
         ))}
-        {tagsData.find(tag => tag.includes('track-title-'))
-          ? <CheckableTag
+        {tagsData.some(tag => tag.includes('track-title-')) && (
+          <CheckableTag
             checked={selectedTags.includes(t('trackTitle'))}
             onChange={checked => handleChange(t('trackTitle'), checked)}
-          >
+            >
             {t('trackTitle')}
           </CheckableTag>
-          : null}
+        )}
       </div>
       <Input ref={inputRef} onChange={e => filterData(e.target.value)} allowClear style={{ maxWidth: '300px' }} />
     </React.Fragment>

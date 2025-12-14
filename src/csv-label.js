@@ -91,7 +91,7 @@ function CustomCSVLabel({
                 disabled={actionButton.disabled}
                 className={classNames('u-action-button', { 'u-danger-action-button': actionButton.danger })}
                 onClick={event => handleActionButtonClick(event, actionButton)}
-              />
+                />
             </Tooltip>
           </div>
         ))}
@@ -104,7 +104,7 @@ function CustomCSVLabel({
       style={{ marginBottom: index < arrayLength - 1 ? '-0.3rem' : '1rem' }}
       {...dragHandleProps}
       className={classNames('ItemPanel', 'List-TemplateItem', { 'is-dragged': isDragged, 'is-other-dragged': isOtherDragged })}
-    >
+      >
       {children}
       <div>{renderActionButtons()}</div>
     </div>
