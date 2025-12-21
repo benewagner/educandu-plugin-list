@@ -149,7 +149,7 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const updateContent = newContentValues => {
     const newContent = { ...content, ...newContentValues };
-    let cleaned = cleanTrackPairsPerRow(cloneDeep(newContent.csvData, isCC0Music)); // pro Zeile leere Tracks entfernen/zusammenschieben
+    let cleaned = cleanTrackPairsPerRow(cloneDeep(newContent.csvData), isCC0Music); // pro Zeile leere Tracks entfernen/zusammenschieben
     cleaned = trimTrackHeadersToMaxUsage(cleaned, isCC0Music);          // unbenutzte Track-Header entfernen
    
     onContentChanged({ ...newContent, csvData: cleaned });
