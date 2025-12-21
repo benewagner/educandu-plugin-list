@@ -25,7 +25,7 @@ export default function ListEditor({ content, onContentChanged }) {
   const droppableIdRef = useRef(useId());
   const { t } = useTranslation('benewagner/educandu-plugin-list');
   const { listName, csvData, renderSearch } = content;
-  const isCC0Music = csvData[0].includes('bsb-url-1');
+  const isCC0Music = csvData?.[0].includes('bsb-url-1');
 
   const hasCsvData = csvData.length >= 1 && csvData[0].length > 0;
 
@@ -149,9 +149,9 @@ export default function ListEditor({ content, onContentChanged }) {
 
   const updateContent = newContentValues => {
     const newContent = { ...content, ...newContentValues };
-    let cleaned = cleanTrackPairsPerRow(cloneDeep(newContent.csvData)); // pro Zeile leere Tracks entfernen/zusammenschieben
+    let cleaned = cleanTrackPairsPerRow(cloneDeep(newContent.csvData, isCC0Music)); // pro Zeile leere Tracks entfernen/zusammenschieben
     cleaned = trimTrackHeadersToMaxUsage(cleaned, isCC0Music);          // unbenutzte Track-Header entfernen
-
+   
     onContentChanged({ ...newContent, csvData: cleaned });
   };
 
@@ -197,7 +197,8 @@ export default function ListEditor({ content, onContentChanged }) {
             }
 
             // Erkennung der Kodierung mit jschardet
-            const encoding = jschardet.detect(binaryString).encoding;
+            const encoding = jschardet.detect(binaryString)?.encoding;
+            if (!encoding) { reject(new Error('No encoding detected')); return; }
             encodingRef.current = encoding;
             resolve();
           } catch (error) {
@@ -512,7 +513,7 @@ export default function ListEditor({ content, onContentChanged }) {
         if (index > csvData[itemToEditIndex].length - 1) {
           return null;
         }
-        if (label.includes('track-title-')) {
+        if (String(label).includes('track-title-')) {
           if (!csvData[itemToEditIndex][index] && !csvData[itemToEditIndex][index + 1]) {
             if (isCC0Music && !csvData[itemToEditIndex][index + 2]) {
               return null;
@@ -522,12 +523,12 @@ export default function ListEditor({ content, onContentChanged }) {
             }
           }
         }
-        if (label.includes('bsb-url-')) {
+        if (String(label).includes('bsb-url-')) {
           if (!csvData[itemToEditIndex][index] && !csvData[itemToEditIndex][index - 1] && !csvData[itemToEditIndex][index + 1]) {
             return null;
           }
         }
-        if (label.includes('track-url-')) {
+        if (String(label).includes('track-url-')) {
           if (!csvData[itemToEditIndex][index] && !csvData[itemToEditIndex][index - 1]) {
             if (isCC0Music && !csvData[itemToEditIndex][index - 2]) {
               return null;
@@ -537,10 +538,10 @@ export default function ListEditor({ content, onContentChanged }) {
             }
           }
         }
-        let type = label.includes('track-title-') ? 'trackTitle' : '';
-        type = label.includes('track-url-') ? 'trackUrl' : type;
-        type = label.includes('bsb-url-') ? 'bsbUrl' : type;
-        let newLabel = label.includes('track-title-') || label.includes('track-url-') || label.includes('bsb-url-') ? t(type) : label;
+        let type = String(label).includes('track-title-') ? 'trackTitle' : '';
+        type = String(label).includes('track-url-') ? 'trackUrl' : type;
+        type = String(label).includes('bsb-url-') ? 'bsbUrl' : type;
+        let newLabel = String(label).includes('track-title-') || label.includes('track-url-') || label.includes('bsb-url-') ? t(type) : label;
 
         if (newLabel !== label) {
           const incrementedNumber = type === 'trackTitle' ? itemToEditAudioCount.current + 1 : itemToEditAudioCount.current;
@@ -551,8 +552,8 @@ export default function ListEditor({ content, onContentChanged }) {
           itemToEditAudioCount.current = 0;
         }
 
-        const isTrackTitle = label.includes('track-title-');
-        const isTrackUrl = label.includes('track-url-');
+        const isTrackTitle = String(label).includes('track-title-');
+        const isTrackUrl = String(label).includes('track-url-');
 
         if (isTrackTitle) {
           itemToEditAudioCount.current += 1;

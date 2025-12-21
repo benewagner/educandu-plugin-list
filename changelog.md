@@ -1,3 +1,7 @@
+2.1.6
+
+Fix getCdnResources to respect excisting cdn resources.
+
 2.1.5
 
 Republish

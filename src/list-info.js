@@ -74,6 +74,15 @@ class ListInfo {
   getCdnResources(content) {
     const headers = content.csvData[0];
     const items = cloneDeep(content.csvData.slice(1));
+    for (let i = 0; i < items.length; i += 1) {
+      const elem = items[i];
+      for (let index = 0; index < elem.length; index += 1) {
+        const value = elem[index];
+        if (typeof value === 'string' && value.startsWith('https://cdn.openmusic.academy/')){
+          items[i][index] = value.replace('https://cdn.openmusic.academy/', 'cdn://');
+        }
+      }
+    }
     const cdnUrlIndices = headers.map((header, index) => header.startsWith('track-url-') ? index : false).filter(item => item);
     const cdnResources = [];
     for (const item of items) {
@@ -84,6 +93,7 @@ class ListInfo {
         }
       }
     }
+    // console.log(cdnResources);
     return this.gfm.extractCdnResources(cdnResources.join(' '));
   }
 }
